@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Shopline MCP Server - 143 AI-callable tools for Shopline operations</title>
+    <meta
+      name="description"
+      content="Connect MCP-compatible AI clients to the Shopline Open API with @shopline/mcp, a Node.js stdio server with 143 tools for store analysis and operations."
+    />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='4' y='4' width='24' height='24' rx='8' fill='%238B5CF6'/%3E%3Cpath d='M10 12h12M10 16h9M10 20h6' stroke='white' stroke-width='2.4' stroke-linecap='round'/%3E%3C/svg%3E"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Google+Sans+Code:ital,wght@0,300..800;1,300..800&family=Jost:ital,wght@0,100..900;1,100..900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="sline-container">
+      <header class="sline-hero" id="top">
+        <h1 class="sline-text-hero">Shopline MCP Server</h1>
+        <p class="subtitle">143 AI-callable tools for Shopline Open API analysis and operations</p>
+        <p>
+          <strong>@shopline/mcp</strong> connects Claude Code, Claude Desktop, Codex, and other
+          MCP-compatible clients to Shopline store data through stdio.
+        </p>
+      </header>
+
+      <main>
+        <section class="sline-section" aria-labelledby="what-it-provides">
+          <h2 id="what-it-provides" class="sline-text-h2 sline-text-center">What It Provides</h2>
+          <p class="sline-text-body sline-text-center sline-mb-lg">
+            A Node.js MCP server for store analysis and operations, backed by the Shopline Open API
+            and exposed as structured tools for AI clients.
+          </p>
+
+          <div class="sline-grid sline-grid-cols-3">
+            <article class="sline-card">
+              <h3 class="sline-text-h3">Store data access</h3>
+              <p class="sline-text-body">
+                75 read tools cover orders, products, inventory, customers, promotions, analytics,
+                reviews, conversations, delivery, and store settings.
+              </p>
+            </article>
+            <article class="sline-card">
+              <h3 class="sline-text-h3">Analysis-ready outputs</h3>
+              <p class="sline-text-body">
+                High-value tools summarize sales, rank products, compare channels, segment
+                customers, track stock risk, and measure promotion performance.
+              </p>
+            </article>
+            <article class="sline-card">
+              <h3 class="sline-text-h3">Controlled operations</h3>
+              <p class="sline-text-body">
+                68 write tools can create, update, or delete Shopline resources when the connected
+                API token has the required permissions.
+              </p>
+            </article>
+          </div>
+        </section>
+
+        <section class="sline-section-surface" aria-labelledby="commerce-analysis">
+          <h2 id="commerce-analysis" class="sline-text-h2 sline-text-center">Commerce Analysis</h2>
+          <p class="sline-text-body sline-text-center sline-mb-lg">
+            Built-in analytical tools turn Shopline order, customer, product, inventory, and
+            promotion data into answers that are useful for daily e-commerce decisions.
+          </p>
+
+          <div class="sline-grid sline-grid-cols-3">
+            <article class="sline-card">
+              <h3 class="sline-text-h3">Sales performance</h3>
+              <p class="sline-text-small">
+                Use <code>get_sales_summary</code>, <code>get_top_products</code>,
+                <code>get_sales_trend</code>, and <code>get_channel_comparison</code> to inspect
+                revenue, AOV, product ranking, sales trends, and online versus POS performance.
+              </p>
+            </article>
+            <article class="sline-card">
+              <h3 class="sline-text-h3">Customer behavior</h3>
+              <p class="sline-text-small">
+                Use <code>get_rfm_analysis</code>, <code>get_repurchase_analysis</code>, and
+                <code>get_customer_lifecycle</code> to understand segments, repeat purchase
+                patterns, and customer movement between periods.
+              </p>
+            </article>
+            <article class="sline-card">
+              <h3 class="sline-text-h3">Inventory and promotions</h3>
+              <p class="sline-text-small">
+                Use <code>get_inventory_turnover</code>, <code>get_promotion_roi</code>,
+                <code>get_slow_movers</code>, and <code>get_stock_transfer_suggestions</code> to
+                spot stock risk, promotion lift, slow-moving products, and transfer opportunities.
+              </p>
+            </article>
+          </div>
+        </section>
+
+        <section class="sline-section" aria-labelledby="requirements">
+          <h2 id="requirements" class="sline-text-h2 sline-text-center">Requirements</h2>
+          <p class="sline-text-body sline-text-center sline-mb-lg">
+            Run the server with the supported Node.js runtime and a Shopline Open API token.
+          </p>
+
+          <div class="sline-grid sline-grid-cols-2">
+            <article class="sline-card">
+              <h3 class="sline-text-h3">Runtime</h3>
+              <ul class="sline-text-small">
+                <li>Node.js 24 or newer</li>
+                <li>stdio transport support in your MCP client</li>
+                <li>Executable command: <code>shopline-mcp</code></li>
+              </ul>
+            </article>
+            <article class="sline-card">
+              <h3 class="sline-text-h3">Shopline access</h3>
+              <ul class="sline-text-small">
+                <li>Shopline Open API access token</li>
+                <li>Token env var: <code>SHOPLINE_API_TOKEN</code></li>
+                <li>Token scopes control which tools are available</li>
+              </ul>
+            </article>
+          </div>
+        </section>
+
+        <section id="setup" class="sline-section-surface" aria-labelledby="install-and-run">
+          <h2 id="install-and-run" class="sline-text-h2 sline-text-center">Install and Run</h2>
+          <p class="sline-text-body sline-text-center sline-mb-lg">
+            Install the npm package, or run the published server directly with npx.
+          </p>
+
+          <div class="sline-grid sline-grid-cols-2" id="install">
+            <article class="sline-card">
+              <h3 class="sline-text-h3">Install</h3>
+              <pre class="sline-code"><code>npm install @shopline/mcp</code></pre>
+            </article>
+            <article class="sline-card">
+              <h3 class="sline-text-h3">Run directly</h3>
+              <pre class="sline-code"><code>npx @shopline/mcp</code></pre>
+            </article>
+          </div>
+
+          <div class="sline-connection-info">
+            <h3 class="sline-text-h3">Set the API token before running the server</h3>
+            <pre class="sline-code"><code>export SHOPLINE_API_TOKEN=your_token_here</code></pre>
+          </div>
+        </section>
+
+        <section class="sline-section" aria-labelledby="client-configuration">
+          <h2 id="client-configuration" class="sline-text-h2 sline-text-center">Client Configuration</h2>
+          <p class="sline-text-body sline-text-center sline-mb-lg">
+            Configure your MCP client to start <code>@shopline/mcp</code> over stdio.
+          </p>
+
+          <div class="sline-grid sline-grid-cols-2">
+            <article class="sline-card">
+              <h3 class="sline-text-h3">Claude Code</h3>
+              <pre class="sline-code"><code>claude mcp add --transport stdio shopline \
+  -e SHOPLINE_API_TOKEN=your_token_here \
+  -- npx @shopline/mcp</code></pre>
+            </article>
+            <article class="sline-card">
+              <h3 class="sline-text-h3">Claude Desktop</h3>
+              <pre class="sline-code"><code>{
+  "mcpServers": {
+    "shopline": {
+      "command": "npx",
+      "args": ["@shopline/mcp"],
+      "env": {
+        "SHOPLINE_API_TOKEN": "your_token_here"
+      }
+    }
+  }
+}</code></pre>
+            </article>
+          </div>
+
+          <div class="sline-connection-info sline-mt-lg">
+            <h3 class="sline-text-h3">Codex and other MCP-compatible clients</h3>
+            <p class="sline-text-body">
+              Use stdio transport with <code>npx @shopline/mcp</code> or the installed
+              <code>shopline-mcp</code> executable, and pass <code>SHOPLINE_API_TOKEN</code> in the environment.
+            </p>
+          </div>
+        </section>
+
+        <section id="tools" class="sline-section-surface" aria-labelledby="tool-coverage">
+          <h2 id="tool-coverage" class="sline-text-h2 sline-text-center">Tool Coverage</h2>
+          <p class="sline-text-body sline-text-center sline-mb-lg">
+            The 143 tools span 75 read tools and 68 write tools across the core Shopline Open API
+            resources used by merchants and store operators.
+          </p>
+
+          <div class="sline-grid sline-grid-cols-3">
+            <article class="sline-card">
+              <h3 class="sline-text-h3">Orders</h3>
+              <p class="sline-text-small">
+                Query orders by date, status, channel, and store; inspect line items, labels, tags,
+                action logs, transactions, archived orders, and shipment state.
+              </p>
+            </article>
+            <article class="sline-card">
+              <h3 class="sline-text-h3">Products and inventory</h3>
+              <p class="sline-text-small">
+                Search products, inspect variants, product images, tags, categories, warehouse stock,
+                locked inventory, low stock alerts, price, and quantity.
+              </p>
+            </article>
+            <article class="sline-card">
+              <h3 class="sline-text-h3">Customers and membership</h3>
+              <p class="sline-text-small">
+                Work with customer profiles, search, groups, store credits, member points, membership
+                tiers, tier history, custom fields, and customer promotions.
+              </p>
+            </article>
+            <article class="sline-card">
+              <h3 class="sline-text-h3">Promotions and campaigns</h3>
+              <p class="sline-text-small">
+                Cover promotions, coupons, flash price campaigns, affiliate campaigns, gifts, add-on
+                products, subscriptions, campaign detail, and usage stats.
+              </p>
+            </article>
+            <article class="sline-card">
+              <h3 class="sline-text-h3">Conversations and reviews</h3>
+              <p class="sline-text-small">
+                Read customer service conversations and messages, reply to order or shop threads,
+                and manage product review comments when token permissions allow.
+              </p>
+            </article>
+            <article class="sline-card">
+              <h3 class="sline-text-h3">Delivery and returns</h3>
+              <p class="sline-text-small">
+                Inspect delivery options, time slots, order delivery records, return orders, return
+                order details, and update delivery or pickup store data.
+              </p>
+            </article>
+            <article class="sline-card">
+              <h3 class="sline-text-h3">Store settings</h3>
+              <p class="sline-text-small">
+                Access merchants, channels, payments, taxes, staff permissions, app settings,
+                agents, and token information.
+              </p>
+            </article>
+            <article class="sline-card">
+              <h3 class="sline-text-h3">Purchase orders and POS</h3>
+              <p class="sline-text-small">
+                List purchase orders, inspect purchase order detail, create purchase orders, and work
+                with POS-related inventory and revenue rules.
+              </p>
+            </article>
+            <article class="sline-card">
+              <h3 class="sline-text-h3">Media and metafields</h3>
+              <p class="sline-text-small">
+                Upload media and create merchant app metafields for Shopline resources when the API
+                token includes the necessary scopes.
+              </p>
+            </article>
+          </div>
+        </section>
+
+        <section class="sline-section" aria-labelledby="write-tools">
+          <h2 id="write-tools" class="sline-text-h2 sline-text-center">Write Tools</h2>
+          <p class="sline-text-body sline-text-center sline-mb-lg">
+            This server includes 68 tools that can create, update, or delete Shopline data. Token
+            permissions determine which write actions your AI client can actually use.
+          </p>
+
+          <div class="sline-grid sline-grid-cols-2">
+            <article class="sline-card">
+              <h3 class="sline-text-h3">Clearly marked side effects</h3>
+              <p class="sline-text-body">
+                Write tool descriptions start with <code>[WRITE]</code> and include a
+                <code>【副作用】</code> section so AI clients can distinguish operations that change
+                store data.
+              </p>
+            </article>
+            <article class="sline-card">
+              <h3 class="sline-text-h3">Merchant-controlled access</h3>
+              <p class="sline-text-body">
+                Use the narrowest Shopline Open API token scopes needed for your workflow. Read
+                tools are marked read-only, while write tools are marked as non-read-only and
+                destructive.
+              </p>
+            </article>
+          </div>
+
+          <div class="sline-connection-info sline-mt-lg">
+            <h3 class="sline-text-h3">Operational areas</h3>
+            <p class="sline-text-body">
+              Write coverage includes orders, customers, products, promotions, categories, returns,
+              conversations, reviews, gifts and add-ons, purchase orders, media, metafields,
+              delivery, and merchant settings.
+            </p>
+          </div>
+        </section>
+
+        <section class="sline-section-surface" aria-labelledby="api-notes">
+          <h2 id="api-notes" class="sline-text-h2 sline-text-center">API Notes</h2>
+          <p class="sline-text-body sline-text-center sline-mb-lg">
+            These notes describe the Shopline Open API behavior handled by the server.
+          </p>
+
+          <div class="sline-grid sline-grid-cols-3">
+            <article class="sline-card">
+              <h3 class="sline-text-h3">Endpoint and auth</h3>
+              <ul class="sline-text-small">
+                <li>Base URL: <code>https://open.shopline.io</code></li>
+                <li>Auth: <code>Authorization: Bearer &lt;SHOPLINE_API_TOKEN&gt;</code></li>
+                <li>The shared client handles auth, retry, pagination, and DELETE bodies</li>
+              </ul>
+            </article>
+            <article class="sline-card">
+              <h3 class="sline-text-h3">Pagination and limits</h3>
+              <ul class="sline-text-small">
+                <li>Pagination uses <code>page</code> and <code>per_page</code></li>
+                <li><code>per_page</code> max is 50</li>
+                <li>Search limit is 10,000 results</li>
+                <li>Large order searches are paginated internally</li>
+              </ul>
+            </article>
+            <article class="sline-card">
+              <h3 class="sline-text-h3">Order and money rules</h3>
+              <ul class="sline-text-small">
+                <li>Orders search does not support <code>sort_by</code></li>
+                <li>Online revenue orders use <code>confirmed</code></li>
+                <li>POS revenue orders use <code>completed</code></li>
+                <li>Channel source is <code>shop</code> or <code>pos</code></li>
+                <li>Money values come from <code>dollars</code></li>
+              </ul>
+            </article>
+          </div>
+        </section>
+
+        <section class="sline-cta" aria-labelledby="ready">
+          <h2 id="ready" class="sline-text-h2">Use @shopline/mcp with your MCP client</h2>
+          <p class="sline-text-body">
+            Run the server with a Shopline Open API token, connect over stdio, and give your AI
+            client access to Shopline store analysis and operations.
+          </p>
+          <a href="#setup" class="sline-btn sline-btn-primary">Install and Run</a>
+          <a href="#tools" class="sline-btn sline-btn-secondary">View Tool Coverage</a>
+        </section>
+      </main>
+
+      <footer class="sline-footer">
+        <p class="sline-text-small">
+          Published as <code>@shopline/mcp</code>. Use <code>@shopline/mcp</code> for npm registry installs.
+        </p>
+      </footer>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,10 @@
+# package.json "files" is the source of truth.
+# This file is a defensive fallback for npm packaging.
+
+*
+!dist/
+!dist/**
+!README.md
+!README.zh-TW.md
+!LICENSE
+!package.json

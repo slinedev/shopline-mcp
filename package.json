@@ -1,0 +1,52 @@
+{
+  "name": "@shopline/mcp",
+  "version": "1.0.0",
+  "description": "MCP server wrapping the Shopline Open API into AI-callable tools for e-commerce analysis and operations.",
+  "type": "module",
+  "license": "MIT",
+  "author": "Asgard AI Platform",
+  "bin": {
+    "shopline-mcp": "./dist/index.js"
+  },
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "README.zh-TW.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "build": "tsc -p tsconfig.json && chmod +x dist/index.js",
+    "test": "vitest run",
+    "test:smoke": "node tests/smoke-tools-list.mjs",
+    "verify": "npm run typecheck && npm run build && npm test && npm run test:smoke",
+    "prepack": "npm run build"
+  },
+  "keywords": [
+    "mcp",
+    "shopline",
+    "e-commerce",
+    "ai-agent",
+    "claude"
+  ],
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "^24.13.1",
+    "tsx": "^4.22.4",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.8"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": false
+  }
+}

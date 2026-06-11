@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "shopline": {
+      "command": "node",
+      "args": ["dist/index.js"],
+      "cwd": "${PWD}",
+      "env": {
+        "SHOPLINE_API_TOKEN": "${SHOPLINE_API_TOKEN}"
+      }
+    }
+  }
+}

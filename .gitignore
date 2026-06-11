@@ -1,0 +1,12 @@
+.DS_Store
+.env
+*.tmp
+node_modules/
+dist/
+coverage/
+.vitest/
+npm-debug.log*
+.claude/*.md
+.claude/*.local.*
+PUBLISHING.md
+.github
