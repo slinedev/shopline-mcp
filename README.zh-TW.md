@@ -1,12 +1,17 @@
 # Shopline MCP Server
 
-Shopline Open API 的 MCP server，npm 套件名稱為 `@shopline/mcp`。
+Shopline Open API 的 MCP server，npm 套件名稱為 `shopline-mcp`。
 
 此 server 提供 143 個可供 AI Agent 呼叫的 Shopline 工具：
 
 - 75 個讀取工具：訂單、商品、庫存、客戶、促銷、分析、評論、對話、商店設定
 - 68 個寫入工具：建立、更新、刪除 Shopline 資源
 - 使用 stdio transport，可接 Claude Code、Claude Desktop、Codex 與其他 MCP client
+
+## 連結
+
+- 倉庫地址：[slinedev/shopline-mcp](https://github.com/slinedev/shopline-mcp)
+- 官方網站：[https://sline.dev/shopline-mcp/](https://sline.dev/shopline-mcp/)
 
 ## 環境需求
 
@@ -22,13 +27,13 @@ export SHOPLINE_API_TOKEN=your_token_here
 ## 安裝
 
 ```bash
-npm install @shopline/mcp
+npm install shopline-mcp
 ```
 
 或直接執行：
 
 ```bash
-npx @shopline/mcp
+npx shopline-mcp
 ```
 
 安裝後的命令為：
@@ -40,7 +45,7 @@ shopline-mcp
 ## Claude Code
 
 ```bash
-claude mcp add --transport stdio shopline -e SHOPLINE_API_TOKEN=your_token_here -- npx @shopline/mcp
+claude mcp add --transport stdio shopline -e SHOPLINE_API_TOKEN=your_token_here -- npx shopline-mcp
 ```
 
 ## Claude Desktop
@@ -50,7 +55,7 @@ claude mcp add --transport stdio shopline -e SHOPLINE_API_TOKEN=your_token_here 
   "mcpServers": {
     "shopline": {
       "command": "npx",
-      "args": ["@shopline/mcp"],
+      "args": ["shopline-mcp"],
       "env": {
         "SHOPLINE_API_TOKEN": "your_token_here"
       }
@@ -77,6 +82,6 @@ claude mcp add --transport stdio shopline -e SHOPLINE_API_TOKEN=your_token_here 
 
 ## 套件名稱
 
-npm registry 安裝請使用 `@shopline/mcp`。
+npm registry 安裝請使用 `shopline-mcp`。
 
 沒有 `@` 的 `shopline/mcp` 不是 npm 套件名稱，npm 會把它當成 GitHub repository shorthand。

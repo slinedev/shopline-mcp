@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-Shopline API MCP Server implemented in TypeScript/Node.js. The package is published as `@shopline/mcp` and exposes 143 tools (75 read + 68 write) over stdio for MCP-compatible clients.
+Shopline API MCP Server implemented in TypeScript/Node.js. The package is published as `shopline-mcp` and exposes 143 tools (75 read + 68 write) over stdio for MCP-compatible clients.
 
 Tool descriptions remain in Traditional Chinese (`zh-Hant`) because they are shown to AI clients and match the Shopline merchant context.
 

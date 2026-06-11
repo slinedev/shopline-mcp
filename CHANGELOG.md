@@ -3,7 +3,7 @@
 ## 1.0.0
 
 - Rebuilt the project as a TypeScript/Node.js MCP server.
-- Package name is now `@shopline/mcp`.
+- Package name is now `shopline-mcp`.
 - Added `shopline-mcp` executable.
 - Switched runtime to stdio via `@modelcontextprotocol/sdk`.
 - Preserved the 143-tool baseline: 75 read tools and 68 write tools.

@@ -1,10 +1,15 @@
 {
-  "name": "@shopline/mcp",
+  "name": "shopline-mcp",
   "version": "1.0.0",
   "description": "MCP server wrapping the Shopline Open API into AI-callable tools for e-commerce analysis and operations.",
   "type": "module",
   "license": "MIT",
   "author": "Asgard AI Platform",
+  "homepage": "https://sline.dev/shopline-mcp/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/slinedev/shopline-mcp.git"
+  },
   "bin": {
     "shopline-mcp": "./dist/index.js"
   },

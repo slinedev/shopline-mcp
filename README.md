@@ -1,12 +1,17 @@
 # Shopline MCP Server
 
-An MCP server for the Shopline Open API, published as `@shopline/mcp`.
+An MCP server for the Shopline Open API, published as `shopline-mcp`.
 
 It exposes 143 AI-callable tools for Shopline store analysis and operations:
 
 - 75 read tools for orders, products, inventory, customers, promotions, analytics, reviews, conversations, and store settings
 - 68 write tools for creating, updating, and deleting Shopline resources
 - stdio transport for Claude Code, Claude Desktop, Codex, and other MCP-compatible clients
+
+## Links
+
+- Repository: [slinedev/shopline-mcp](https://github.com/slinedev/shopline-mcp)
+- Official website: [https://sline.dev/shopline-mcp/](https://sline.dev/shopline-mcp/)
 
 ## Requirements
 
@@ -22,13 +27,13 @@ export SHOPLINE_API_TOKEN=your_token_here
 ## Install
 
 ```bash
-npm install @shopline/mcp
+npm install shopline-mcp
 ```
 
 Or run it directly:
 
 ```bash
-npx @shopline/mcp
+npx shopline-mcp
 ```
 
 The executable command is:
@@ -40,7 +45,7 @@ shopline-mcp
 ## Claude Code
 
 ```bash
-claude mcp add --transport stdio shopline -e SHOPLINE_API_TOKEN=your_token_here -- npx @shopline/mcp
+claude mcp add --transport stdio shopline -e SHOPLINE_API_TOKEN=your_token_here -- npx shopline-mcp
 ```
 
 ## Claude Desktop
@@ -50,7 +55,7 @@ claude mcp add --transport stdio shopline -e SHOPLINE_API_TOKEN=your_token_here 
   "mcpServers": {
     "shopline": {
       "command": "npx",
-      "args": ["@shopline/mcp"],
+      "args": ["shopline-mcp"],
       "env": {
         "SHOPLINE_API_TOKEN": "your_token_here"
       }
@@ -77,6 +82,6 @@ Write tools are marked with `[WRITE]` in their descriptions and include a side-e
 
 ## Package Name
 
-Use `@shopline/mcp` for npm registry installs.
+Use `shopline-mcp` for npm registry installs.
 
 `shopline/mcp` without `@` is not an npm package name. npm treats that form as a GitHub repository shorthand.
