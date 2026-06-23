@@ -1,4 +1,0 @@
-[mcp_servers.shopline]
-command = "node"
-args = ["dist/index.js"]
-env_vars = ["SHOPLINE_API_TOKEN"]
