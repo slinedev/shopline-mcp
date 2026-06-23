@@ -11,3 +11,8 @@ npm-debug.log*
 PUBLISHING.md
 .github
 mcp-shopline-python
+shopline-mcp
+DEV.md
+.codex
+reference/
+CONTRIBUTING.md
