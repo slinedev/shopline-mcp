@@ -1,6 +1,6 @@
 {
   "name": "shopline-mcp",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "MCP server wrapping the Shopline Open API into AI-callable tools for e-commerce analysis and operations.",
   "type": "module",
   "license": "MIT",

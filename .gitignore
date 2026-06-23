@@ -10,3 +10,4 @@ npm-debug.log*
 .claude/*.local.*
 PUBLISHING.md
 .github
+mcp-shopline-python
