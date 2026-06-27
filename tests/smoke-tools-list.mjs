@@ -51,8 +51,8 @@ send({ jsonrpc: "2.0", id: 2, method: "tools/list", params: {} });
 const listResponse = await waitFor(2);
 
 const tools = listResponse.result?.tools ?? [];
-if (tools.length !== 149) {
-  throw new Error(`Expected 149 tools, got ${tools.length}`);
+if (tools.length !== 153) {
+  throw new Error(`Expected 153 tools, got ${tools.length}`);
 }
 
 child.stdin.end();

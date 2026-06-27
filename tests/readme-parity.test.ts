@@ -10,7 +10,7 @@ const englishSections = [
   "API Reference",
   "Quick Start",
   "Important: Write Tools",
-  "Tools (149 total)",
+  "Tools (153 total)",
   "API Endpoint Coverage",
   "API Constraints",
   "Usage Examples",
@@ -22,7 +22,7 @@ const zhSections = [
   "API 參考文件",
   "快速開始",
   "重要：寫入工具",
-  "工具清單（149 個）",
+  "工具清單（153 個）",
   "API 端點覆蓋範圍",
   "API 限制",
   "使用範例",
@@ -39,8 +39,12 @@ describe("README Python parity", () => {
 
     expect(english).toContain("npm install shopline-mcp");
     expect(english).toContain("npx shopline-mcp");
-    expect(english).toContain("6 assistant tools");
+    expect(english).toContain("10 assistant tools");
     expect(english).toContain("dry_run: true");
+    expect(english).toContain("approval_code");
+    expect(english).toContain("SHOPLINE_REQUIRE_WRITE_APPROVAL=1");
+    expect(english).toContain("Human in the loop");
+    expect(english).toContain("third-party open-source package");
     expect(english).toContain("SHOPLINE_STORES_JSON");
     expect(english).toContain(
       "rebuilt with reference to the MIT-licensed Python project [asgard-ai-platform/mcp-shopline](https://github.com/asgard-ai-platform/mcp-shopline)",
@@ -64,8 +68,12 @@ describe("README Python parity", () => {
 
     expect(traditionalChinese).toContain("npm install shopline-mcp");
     expect(traditionalChinese).toContain("npx shopline-mcp");
-    expect(traditionalChinese).toContain("6 個輔助工具");
+    expect(traditionalChinese).toContain("10 個輔助工具");
     expect(traditionalChinese).toContain("dry_run: true");
+    expect(traditionalChinese).toContain("approval_code");
+    expect(traditionalChinese).toContain("SHOPLINE_REQUIRE_WRITE_APPROVAL=1");
+    expect(traditionalChinese).toContain("Human in the loop");
+    expect(traditionalChinese).toContain("第三方開源套件");
     expect(traditionalChinese).toContain("SHOPLINE_STORES_JSON");
     expect(traditionalChinese).toContain("參考自採用 MIT 授權的 Python 專案 [asgard-ai-platform/mcp-shopline](https://github.com/asgard-ai-platform/mcp-shopline)");
     expect(traditionalChinese).toContain("參考 Python 專案（MIT）：[asgard-ai-platform/mcp-shopline](https://github.com/asgard-ai-platform/mcp-shopline)");
@@ -89,6 +97,9 @@ describe("README Python parity", () => {
     expect(dev).toContain("npm pack --dry-run");
     expect(dev).toContain("SHOPLINE_TEST_WRITES=1");
     expect(dev).toContain("SHOPLINE_STORES_JSON");
+    expect(dev).toContain("SHOPLINE_REQUIRE_WRITE_APPROVAL");
+    expect(dev).toContain("approval_code");
+    expect(dev).toContain("Human in the loop");
     expect(dev).toContain("store_alias");
     expect(dev).toContain("assistant tools");
     expect(dev).toContain("tests/fixtures/python-tool-baseline.json");

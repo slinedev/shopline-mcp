@@ -4,9 +4,9 @@
 
 An MCP server for the Shopline Open API, published as `shopline-mcp` on npm.
 
-It wraps the Shopline Open API into 143 AI-callable business tools (75 read + 68 write) for e-commerce data analysis and store operations. It also includes 6 assistant tools for capability discovery, workflow guidance, write previews, and multi-store configuration checks. It runs over stdio, so it works with Claude Code, Claude Desktop, Codex, and other MCP-compatible clients.
+It wraps the Shopline Open API into 143 AI-callable business tools (75 read + 68 write) for e-commerce data analysis and store operations. It also includes 10 assistant tools for capability discovery, workflow guidance, write previews, Human in the loop approval, product content audits, SEO/GEO readiness checks, reorder forecasting, and multi-store configuration checks. It runs over stdio, so it works with Claude Code, Claude Desktop, Codex, and other MCP-compatible clients.
 
-This TypeScript/Node.js package was rebuilt with reference to the MIT-licensed Python project [asgard-ai-platform/mcp-shopline](https://github.com/asgard-ai-platform/mcp-shopline).
+This is a third-party open-source package, not an official SHOPLINE product. This TypeScript/Node.js package was rebuilt with reference to the MIT-licensed Python project [asgard-ai-platform/mcp-shopline](https://github.com/asgard-ai-platform/mcp-shopline).
 
 ## Links
 
@@ -19,7 +19,7 @@ This TypeScript/Node.js package was rebuilt with reference to the MIT-licensed P
 - **143 ready-to-use tools** covering orders, products, inventory, customers, promotions, categories, subscriptions, conversations, reviews, and store settings
 - **75 read tools** for querying and analyzing Shopline data
 - **68 write tools** for creating, updating, and deleting Shopline resources
-- **6 assistant tools** for tool search, workflow recommendations, write previews, and store alias checks
+- **10 assistant tools** for tool search, workflow recommendations, write previews, Human in the loop approval, content/SEO audits, reorder forecasting, and store alias checks
 - **MCP stdio server** for local AI clients
 - **Built-in API handling** for authentication, pagination, retry, date windows, and DELETE requests with JSON bodies
 - **Multi-store routing** with optional `store_alias` when `SHOPLINE_STORES_JSON` is configured
@@ -93,10 +93,12 @@ This server includes tools that can create, update, or delete data in your Shopl
 - Write tools are marked with `[WRITE]`
 - Write descriptions include a `【副作用】` side-effect section
 - Pass `dry_run: true` to a write tool to preview the API method, path, parameters, and body without changing store data
+- Dry-run previews include an `approval_code` for Human in the loop review
+- Set `SHOPLINE_REQUIRE_WRITE_APPROVAL=1` to require the matching `approval_code` before any write tool can run
 
-## Tools (149 total)
+## Tools (153 total)
 
-This server exposes 143 Shopline API business tools plus 6 assistant tools.
+This server exposes 143 Shopline API business tools plus 10 assistant tools.
 
 ### Read Tools (75)
 
@@ -127,7 +129,7 @@ This server exposes 143 Shopline API business tools plus 6 assistant tools.
 | Media & Metafields | Upload media and create metafields |
 | Delivery & Merchant | Update order delivery, pickup store, and merchant settings |
 
-### Assistant Tools (6)
+### Assistant Tools (10)
 
 | Tool | Purpose |
 |------|---------|
@@ -137,12 +139,16 @@ This server exposes 143 Shopline API business tools plus 6 assistant tools.
 | `recommend_shopline_workflow` | Recommend tool sequences for merchant tasks such as sales reports or inventory risk |
 | `preview_shopline_write_tool` | Preview a write tool without calling Shopline |
 | `list_shopline_store_profiles` | List configured store aliases without exposing tokens |
+| `prepare_shopline_write_approval` | Generate a human-review write preview and approval code |
+| `audit_shopline_product_content` | Find products missing content, images, categories, tags, or brand fields |
+| `audit_shopline_seo_readiness` | Find products missing SEO/GEO fields and return review drafts |
+| `forecast_shopline_reorder_candidates` | Estimate SKUs that may need replenishment from sales, stock, and locked inventory |
 
 ## API Endpoint Coverage
 
 The package currently covers:
 
-- 149 tools total
+- 153 tools total
 - 143 Shopline API business tools
 - 75 read tools
 - 68 write tools
@@ -216,11 +222,42 @@ create_customer(
 )
 ```
 
+### "Require human approval before writes"
+
+```bash
+export SHOPLINE_REQUIRE_WRITE_APPROVAL=1
+```
+
+```text
+prepare_shopline_write_approval(
+  tool_name = "update_product",
+  args = { product_id = "product_id", product_data = { status = "active" } }
+)
+
+update_product(
+  product_id = "product_id",
+  product_data = { status = "active" },
+  approval_code = "code_from_reviewed_preview"
+)
+```
+
 ### "Which tool should I use?"
 
 ```text
 find_shopline_tools(query = "low stock", mode = "read")
 recommend_shopline_workflow(task = "Prepare a weekly sales report")
+```
+
+### "Find content, SEO, or reorder work for review"
+
+```text
+audit_shopline_product_content(max_products = 50)
+audit_shopline_seo_readiness(max_products = 50)
+forecast_shopline_reorder_candidates(
+  start_date = "2026-03-01",
+  end_date = "2026-03-31",
+  horizon_days = 14
+)
 ```
 
 ## License

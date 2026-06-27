@@ -16,3 +16,6 @@ DEV.md
 .codex
 reference/
 CONTRIBUTING.md
+.playwright-cli
+output
+.vscode

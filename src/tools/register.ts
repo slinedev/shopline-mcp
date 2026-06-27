@@ -8,12 +8,13 @@ import type { ToolSpec } from "../types.js";
 import { registerAssistantTools } from "./assistant.js";
 import { customHandlers } from "./custom.js";
 import { executeGenericTool } from "./generic.js";
-import { buildWritePreview } from "./operationPlan.js";
+import { assertWriteApproved, buildWritePreview } from "./operationPlan.js";
 
 export const SHOPLINE_TOOL_SPECS: readonly ToolSpec[] = toolSpecs as readonly ToolSpec[];
 
 async function executeTool(spec: ToolSpec, args: Record<string, unknown>): Promise<Record<string, unknown>> {
   if (spec.write && args.dry_run === true) return buildWritePreview(spec, args);
+  if (spec.write) assertWriteApproved(spec, args);
   const custom = customHandlers[spec.name];
   if (custom) return custom(args);
   return executeGenericTool({ spec, args });

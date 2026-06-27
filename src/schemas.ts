@@ -82,6 +82,10 @@ export function buildToolInputSchema(
       .optional()
       .default(false)
       .describe("Optional caller-side confirmation marker for write tools.");
+    shape.approval_code = z
+      .string()
+      .optional()
+      .describe("Approval code returned by a dry run or prepare_shopline_write_approval when SHOPLINE_REQUIRE_WRITE_APPROVAL=1 is enabled.");
   }
 
   return z.object(shape);

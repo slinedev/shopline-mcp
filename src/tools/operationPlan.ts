@@ -1,8 +1,10 @@
+import { createHash } from "node:crypto";
+
 import { ENDPOINTS, endpointPathParams, getUrl } from "../config.js";
 import { pageCountForLimit } from "../shared/helpers.js";
 import type { ApiOperation, ToolContext, ToolSpec } from "../types.js";
 
-export const RUNTIME_ARG_NAMES = new Set(["store_alias", "dry_run", "confirm_write"]);
+export const RUNTIME_ARG_NAMES = new Set(["store_alias", "dry_run", "confirm_write", "approval_code"]);
 
 export function isPresent(value: unknown): boolean {
   return value !== undefined && value !== null && value !== "";
@@ -22,6 +24,21 @@ export function operationFor(context: ToolContext): ApiOperation | undefined {
 
 export function writeOperationFor(spec: ToolSpec): ApiOperation | undefined {
   return spec.operations.find((operation) => operation.method !== "GET") ?? spec.operations[0];
+}
+
+function stableValue(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(stableValue);
+  if (!value || typeof value !== "object") return value;
+  return Object.fromEntries(
+    Object.entries(value as Record<string, unknown>)
+      .filter(([, item]) => item !== undefined)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([key, item]) => [key, stableValue(item)]),
+  );
+}
+
+function stableStringify(value: unknown): string {
+  return JSON.stringify(stableValue(value));
 }
 
 export function collectPathParams(endpointKey: string, args: Record<string, unknown>): Record<string, unknown> {
@@ -149,6 +166,46 @@ export function buildWritePreview(spec: ToolSpec, args: Record<string, unknown>)
     missing_path_params: missingPathParams,
     body: inferWriteBody(operation, args),
     requires_confirmation: true,
+    approval_code: buildWriteApprovalCode(spec, args),
     confirmation_hint: "Review this preview with the merchant before calling the write tool without dry_run.",
+    approval_hint:
+      "If SHOPLINE_REQUIRE_WRITE_APPROVAL=1 is enabled, pass this approval_code with the same write arguments to execute the write.",
   };
+}
+
+export function buildWriteApprovalCode(spec: ToolSpec, args: Record<string, unknown>): string {
+  if (!spec.write) {
+    throw new Error(`Tool ${spec.name} is read-only and cannot be approved as a write`);
+  }
+
+  const operation = writeOperationFor(spec);
+  if (!operation) {
+    throw new Error(`No write operation metadata is available for tool ${spec.name}`);
+  }
+
+  const payload = {
+    tool_name: spec.name,
+    method: operation.method,
+    endpoint_key: operation.endpointKey,
+    path_params: collectPathParams(operation.endpointKey, args),
+    body: inferWriteBody(operation, args),
+    store_alias: typeof args.store_alias === "string" && args.store_alias ? args.store_alias : undefined,
+  };
+  return createHash("sha256").update(stableStringify(payload)).digest("hex").slice(0, 16);
+}
+
+export function writeApprovalRequired(): boolean {
+  return ["1", "true", "yes"].includes(String(process.env.SHOPLINE_REQUIRE_WRITE_APPROVAL ?? "").toLowerCase());
+}
+
+export function assertWriteApproved(spec: ToolSpec, args: Record<string, unknown>): void {
+  if (!spec.write || !writeApprovalRequired()) return;
+
+  const expected = buildWriteApprovalCode(spec, args);
+  const actual = typeof args.approval_code === "string" ? args.approval_code : "";
+  if (actual !== expected) {
+    throw new Error(
+      `Write approval required for ${spec.name}. Run the write with dry_run: true or call prepare_shopline_write_approval, review the preview with a human, then pass the matching approval_code.`,
+    );
+  }
 }

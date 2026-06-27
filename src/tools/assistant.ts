@@ -1,8 +1,10 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 
+import { fetchAllPages } from "../client.js";
 import { getConfiguredStoreProfiles, withShoplineStore } from "../config.js";
 import { toolSpecs } from "../generated/toolSpecs.js";
+import { asArray, asRecord, daysBetween, getTranslation, parseDate, round, sumQuantity, VALID_ORDER_STATUSES } from "../shared/helpers.js";
 import { toToolError, toToolResult } from "../shared/helpers.js";
 import type { ToolSpec } from "../types.js";
 import { buildWritePreview } from "./operationPlan.js";
@@ -16,6 +18,10 @@ export const ASSISTANT_TOOL_NAMES = [
   "recommend_shopline_workflow",
   "preview_shopline_write_tool",
   "list_shopline_store_profiles",
+  "audit_shopline_product_content",
+  "audit_shopline_seo_readiness",
+  "forecast_shopline_reorder_candidates",
+  "prepare_shopline_write_approval",
 ] as const;
 
 type AssistantToolName = (typeof ASSISTANT_TOOL_NAMES)[number];
@@ -112,6 +118,8 @@ function describeCapabilities(): Record<string, unknown> {
       write_marker: "[WRITE]",
       side_effect_marker: "【副作用】",
       dry_run_supported: true,
+      approval_code_supported: true,
+      approval_env_var: "SHOPLINE_REQUIRE_WRITE_APPROVAL",
       store_alias_supported: true,
     },
   };
@@ -251,6 +259,39 @@ const WORKFLOWS = [
     ],
     required_inputs: ["product_id", "variation_id", "price", "quantity"],
   },
+  {
+    name: "product_content_review",
+    keywords: ["description", "content", "copy", "商品描述", "內容", "内容", "文案", "一致"],
+    steps: [
+      { tool: "audit_shopline_product_content", why: "Find products with missing or weak merchant-facing content." },
+      { tool: "get_product_list", why: "Review product context before drafting changes." },
+      { tool: "prepare_shopline_write_approval", why: "Prepare a human-reviewed write preview before changing product content." },
+      { tool: "update_product", why: "Apply approved product content changes only after review." },
+    ],
+    required_inputs: ["max_products", "min_description_length", "product_id", "product_data"],
+  },
+  {
+    name: "seo_geo_readiness",
+    keywords: ["seo", "geo", "keyword", "search", "關鍵字", "关键字", "搜尋", "搜索"],
+    steps: [
+      { tool: "audit_shopline_seo_readiness", why: "Find products missing SEO/GEO fields and produce review drafts." },
+      { tool: "get_category_tree", why: "Confirm available category context before approving updates." },
+      { tool: "prepare_shopline_write_approval", why: "Generate an approval code for the reviewed product update." },
+      { tool: "update_product", why: "Apply approved SEO/GEO metadata updates." },
+    ],
+    required_inputs: ["max_products", "product_id", "product_data"],
+  },
+  {
+    name: "reorder_forecast",
+    keywords: ["reorder", "forecast", "purchase", "補貨", "补货", "預測", "预测", "採購", "采购"],
+    steps: [
+      { tool: "forecast_shopline_reorder_candidates", why: "Estimate which SKUs may run out within the planning horizon." },
+      { tool: "get_locked_inventory", why: "Check inventory already reserved by pending fulfillment." },
+      { tool: "list_purchase_orders", why: "Review recent purchase orders before creating a new one." },
+      { tool: "prepare_shopline_write_approval", why: "Preview any purchase order or inventory write before execution." },
+    ],
+    required_inputs: ["start_date", "end_date", "horizon_days", "low_stock_threshold"],
+  },
 ];
 
 function recommendWorkflow(args: Record<string, unknown>): Record<string, unknown> {
@@ -286,12 +327,296 @@ async function previewWriteTool(args: Record<string, unknown>): Promise<Record<s
 
   const writeArgs = args.args && typeof args.args === "object" && !Array.isArray(args.args) ? (args.args as Record<string, unknown>) : {};
   const storeAlias = args.store_alias ?? writeArgs.store_alias;
-  return withShoplineStore(storeAlias, async () => buildWritePreview(spec, writeArgs));
+  const previewArgs = typeof storeAlias === "string" && storeAlias ? { ...writeArgs, store_alias: storeAlias } : writeArgs;
+  return withShoplineStore(storeAlias, async () => buildWritePreview(spec, previewArgs));
+}
+
+async function prepareWriteApproval(args: Record<string, unknown>): Promise<Record<string, unknown>> {
+  const preview = await previewWriteTool(args);
+  return {
+    ...preview,
+    approval_required_when: "SHOPLINE_REQUIRE_WRITE_APPROVAL=1",
+    human_review_required: true,
+  };
 }
 
 function listStoreProfiles(): Record<string, unknown> {
   return {
     stores: getConfiguredStoreProfiles(),
+  };
+}
+
+function hasText(value: unknown): boolean {
+  return typeof value === "string" ? value.trim().length > 0 : value !== undefined && value !== null && value !== "";
+}
+
+function localizedText(value: unknown): string {
+  if (typeof value === "string") return value.trim();
+  return getTranslation(value).trim();
+}
+
+function productTitle(product: Record<string, unknown>): string {
+  return localizedText(product.title_translations) || localizedText(product.name_translations) || String(product.title ?? product.name ?? "").trim();
+}
+
+function productDescription(product: Record<string, unknown>): string {
+  return (
+    localizedText(product.description_translations) ||
+    localizedText(product.seo_description_translations) ||
+    String(product.description ?? product.body_html ?? product.content ?? "").trim()
+  );
+}
+
+function productSeoTitle(product: Record<string, unknown>): string {
+  return localizedText(product.seo_title_translations) || String(product.seo_title ?? "").trim();
+}
+
+function productSeoDescription(product: Record<string, unknown>): string {
+  return localizedText(product.seo_description_translations) || String(product.seo_description ?? "").trim();
+}
+
+function productSeoKeywords(product: Record<string, unknown>): string[] {
+  const rawKeywords = product.seo_keywords ?? product.keywords ?? localizedText(product.seo_keywords_translations);
+  const fromText =
+    typeof rawKeywords === "string"
+      ? rawKeywords
+          .split(/[,，\s]+/)
+          .map((item) => item.trim())
+          .filter(Boolean)
+      : [];
+  return [...fromText, ...productTags(product)];
+}
+
+function productTags(product: Record<string, unknown>): string[] {
+  return asArray(product.tags)
+    .map(String)
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function productCategoryIds(product: Record<string, unknown>): string[] {
+  return [...asArray(product.category_ids), ...asArray(product.categories).map((category) => asRecord(category).id)]
+    .filter(hasText)
+    .map(String)
+    .filter(Boolean);
+}
+
+function productImageCount(product: Record<string, unknown>): number {
+  const images = asArray(product.images).length + asArray(product.media).length + asArray(product.photos).length;
+  const singleImages = [product.image_url, product.cover_image, product.featured_image].filter(hasText).length;
+  return images + singleImages;
+}
+
+function productStock(product: Record<string, unknown>): number {
+  const variations = asArray(product.variations);
+  return variations.length ? sumQuantity(variations, 0) : Number(product.quantity ?? 0);
+}
+
+function productSku(product: Record<string, unknown>): string {
+  const firstVariation = asRecord(asArray(product.variations)[0]);
+  const sku = product.sku ?? firstVariation.sku;
+  return hasText(sku) ? String(sku) : "";
+}
+
+function dateRangeDays(startDate: string, endDate: string): number {
+  const days = daysBetween(parseDate(`${startDate}T00:00:00Z`), parseDate(`${endDate}T00:00:00Z`));
+  return days || 1;
+}
+
+function periodParams(startDate: string, endDate: string): Record<string, string> {
+  return {
+    created_after: `${startDate}T00:00:00Z`,
+    created_before: `${endDate}T23:59:59Z`,
+  };
+}
+
+async function fetchProducts(limit: number): Promise<Record<string, unknown>[]> {
+  const pages = Math.max(1, Math.ceil(limit / 50));
+  return (await fetchAllPages("products", { per_page: 50 }, undefined, pages)).slice(0, limit);
+}
+
+async function auditProductContent(args: Record<string, unknown>): Promise<Record<string, unknown>> {
+  const limit = clampLimit(args.max_products, 50, 200);
+  const minDescriptionLength = clampLimit(args.min_description_length, 30, 500);
+  const products = await fetchProducts(limit);
+  const flagged = products
+    .map((product) => {
+      const title = productTitle(product);
+      const description = productDescription(product);
+      const tags = productTags(product);
+      const categoryIds = productCategoryIds(product);
+      const issues: string[] = [];
+      if (!title) issues.push("missing_title");
+      if (!description) issues.push("missing_description");
+      else if (description.length < minDescriptionLength) issues.push("short_description");
+      if (!hasText(product.brand)) issues.push("missing_brand");
+      if (!productImageCount(product)) issues.push("missing_images");
+      if (!categoryIds.length) issues.push("missing_categories");
+      if (!tags.length) issues.push("missing_tags");
+      return {
+        product_id: product.id,
+        title,
+        sku: productSku(product),
+        issues,
+        review_required: issues.length > 0,
+        current_fields: {
+          has_description: Boolean(description),
+          description_length: description.length,
+          brand: product.brand ?? "",
+          image_count: productImageCount(product),
+          category_count: categoryIds.length,
+          tag_count: tags.length,
+        },
+        recommended_action: issues.length ? "請人工審閱後補齊商品內容，再用寫入預覽產生 approval_code。" : "內容欄位完整。",
+      };
+    })
+    .filter((product) => product.issues.length > 0);
+
+  return {
+    total_products: products.length,
+    products_needing_review: flagged.length,
+    issues_count: flagged.reduce((sum, product) => sum + product.issues.length, 0),
+    products: flagged,
+  };
+}
+
+function suggestedKeywords(product: Record<string, unknown>): string[] {
+  const candidates = [productTitle(product), String(product.brand ?? ""), ...productTags(product)]
+    .map((item) => item.trim())
+    .filter(Boolean);
+  return [...new Set(candidates)].slice(0, 6);
+}
+
+async function auditSeoReadiness(args: Record<string, unknown>): Promise<Record<string, unknown>> {
+  const limit = clampLimit(args.max_products, 50, 200);
+  const products = await fetchProducts(limit);
+  const flagged = products
+    .map((product) => {
+      const seoIssues: string[] = [];
+      if (!productSeoTitle(product) && !productTitle(product)) seoIssues.push("missing_seo_title");
+      if (!productSeoDescription(product) && !productDescription(product)) seoIssues.push("missing_seo_description");
+      if (!productSeoKeywords(product).length) seoIssues.push("missing_keywords");
+      if (!productCategoryIds(product).length) seoIssues.push("missing_categories");
+      return {
+        product_id: product.id,
+        title: productTitle(product),
+        sku: productSku(product),
+        seo_issues: seoIssues,
+        suggested_keywords: suggestedKeywords(product),
+        review_required: seoIssues.length > 0,
+      };
+    })
+    .filter((product) => product.seo_issues.length > 0);
+
+  return {
+    summary: {
+      products_checked: products.length,
+      products_needing_review: flagged.length,
+      drafts_created: flagged.length,
+    },
+    products: flagged,
+    update_drafts: flagged.map((product) => ({
+      product_id: product.product_id,
+      suggested_write_tool: "update_product",
+      review_required: true,
+      draft_product_data: {
+        seo_keywords: product.suggested_keywords,
+      },
+      note: "此草稿只供人工審閱，不會自動寫入 Shopline。",
+    })),
+  };
+}
+
+function orderItemProductId(item: Record<string, unknown>): string {
+  return String(item.item_id ?? item.product_id ?? asRecord(item.object_data).product_id ?? "");
+}
+
+async function fetchRevenueOrders(startDate: string, endDate: string): Promise<Record<string, unknown>[]> {
+  const orders = await fetchAllPages("orders_search", periodParams(startDate, endDate), undefined, 20);
+  return orders.filter((order) => VALID_ORDER_STATUSES.has(String(order.status ?? "")));
+}
+
+async function lockedInventory(): Promise<Map<string, number>> {
+  const locks = await fetchAllPages("products_locked_inventory", { per_page: 50 }, undefined, 5);
+  const map = new Map<string, number>();
+  for (const lock of locks) {
+    const quantity = Number(lock.locked_quantity ?? lock.quantity ?? 0);
+    for (const key of [lock.product_id, lock.item_id, lock.sku]) {
+      if (!hasText(key)) continue;
+      const text = String(key);
+      map.set(text, (map.get(text) ?? 0) + quantity);
+    }
+  }
+  return map;
+}
+
+async function forecastReorderCandidates(args: Record<string, unknown>): Promise<Record<string, unknown>> {
+  const startDate = String(args.start_date ?? "");
+  const endDate = String(args.end_date ?? "");
+  if (!startDate || !endDate) throw new Error("start_date and end_date are required");
+  const horizonDays = clampLimit(args.horizon_days, 14, 365);
+  const lowStockThreshold = clampLimit(args.low_stock_threshold, 5, 10_000);
+  const maxProducts = clampLimit(args.max_products, 50, 200);
+  const periodDays = dateRangeDays(startDate, endDate);
+  const products = await fetchProducts(maxProducts);
+  const orders = await fetchRevenueOrders(startDate, endDate);
+  const locked = await lockedInventory();
+  const salesByProduct = new Map<string, number>();
+  const salesBySku = new Map<string, number>();
+
+  for (const order of orders) {
+    for (const rawItem of asArray(order.subtotal_items)) {
+      const item = asRecord(rawItem);
+      const quantity = Number(item.quantity ?? 1);
+      const productId = orderItemProductId(item);
+      const sku = String(item.sku ?? "");
+      if (productId) salesByProduct.set(productId, (salesByProduct.get(productId) ?? 0) + quantity);
+      if (sku) salesBySku.set(sku, (salesBySku.get(sku) ?? 0) + quantity);
+    }
+  }
+
+  const candidates = products
+    .map((product) => {
+      const productId = String(product.id ?? "");
+      const sku = productSku(product);
+      const currentStock = productStock(product);
+      const lockedQuantity = productId && locked.has(productId) ? (locked.get(productId) ?? 0) : sku ? (locked.get(sku) ?? 0) : 0;
+      const availableStock = Math.max(0, currentStock - lockedQuantity);
+      const unitsSold = (productId ? salesByProduct.get(productId) ?? 0 : 0) || (sku ? salesBySku.get(sku) ?? 0 : 0);
+      const dailyAvgSales = unitsSold / periodDays;
+      const daysOfSupply = dailyAvgSales > 0 ? availableStock / dailyAvgSales : Number.POSITIVE_INFINITY;
+      const needsReorder =
+        currentStock <= lowStockThreshold || (dailyAvgSales > 0 && daysOfSupply <= horizonDays) || (lockedQuantity > 0 && availableStock <= lowStockThreshold);
+      const recommendedReorderQuantity = Math.max(0, Math.ceil(dailyAvgSales * horizonDays + lockedQuantity - currentStock));
+      const status = currentStock <= 0 ? "已缺貨" : dailyAvgSales > 0 && daysOfSupply <= horizonDays ? "補貨優先" : "低庫存觀察";
+      return {
+        product_id: productId,
+        title: productTitle(product),
+        sku,
+        current_stock: currentStock,
+        locked_quantity: lockedQuantity,
+        available_stock: availableStock,
+        units_sold: unitsSold,
+        daily_avg_sales: round(dailyAvgSales, 2),
+        days_of_supply: Number.isFinite(daysOfSupply) ? round(daysOfSupply, 1) : "無銷售",
+        horizon_days: horizonDays,
+        recommended_reorder_quantity: recommendedReorderQuantity,
+        status,
+        needs_reorder: needsReorder,
+      };
+    })
+    .filter((candidate) => candidate.needs_reorder)
+    .map(({ needs_reorder: _needsReorder, ...candidate }) => candidate)
+    .sort((a, b) => Number(a.days_of_supply === "無銷售" ? Number.POSITIVE_INFINITY : a.days_of_supply) - Number(b.days_of_supply === "無銷售" ? Number.POSITIVE_INFINITY : b.days_of_supply));
+
+  return {
+    period: `${startDate} ~ ${endDate}`,
+    period_days: periodDays,
+    horizon_days: horizonDays,
+    low_stock_threshold: lowStockThreshold,
+    products_checked: products.length,
+    candidates_count: candidates.length,
+    candidates,
   };
 }
 
@@ -340,10 +665,49 @@ const assistantTools: readonly AssistantToolDefinition[] = [
     handler: previewWriteTool,
   },
   {
+    name: "prepare_shopline_write_approval",
+    description: "產生 Human in the loop 寫入審核預覽與 approval_code，供人工確認後再執行寫入。",
+    inputSchema: z.object({
+      tool_name: z.string().describe("Exact write tool name to prepare for approval."),
+      args: z.record(z.string(), z.unknown()).optional().default({}).describe("Arguments intended for the write tool."),
+      store_alias: z.string().optional().describe("Optional store alias for multi-store URL preview."),
+    }),
+    handler: prepareWriteApproval,
+  },
+  {
     name: "list_shopline_store_profiles",
     description: "列出已配置的 Shopline store alias，不回傳任何 token 內容。",
     inputSchema: z.object({}),
     handler: listStoreProfiles,
+  },
+  {
+    name: "audit_shopline_product_content",
+    description: "掃描商品內容完整度，找出缺少描述、品牌、圖片、分類或標籤且需要人工審閱的商品。",
+    inputSchema: z.object({
+      max_products: z.number().int().positive().optional().default(50),
+      min_description_length: z.number().int().positive().optional().default(30),
+    }),
+    handler: auditProductContent,
+  },
+  {
+    name: "audit_shopline_seo_readiness",
+    description: "檢查商品 SEO/GEO 準備度，列出缺少描述、關鍵字、分類等欄位並產生人工審閱草稿。",
+    inputSchema: z.object({
+      max_products: z.number().int().positive().optional().default(50),
+    }),
+    handler: auditSeoReadiness,
+  },
+  {
+    name: "forecast_shopline_reorder_candidates",
+    description: "依商品庫存、鎖定庫存與區間銷量估算補貨候選 SKU，僅提供人工決策參考。",
+    inputSchema: z.object({
+      start_date: z.string().describe("Sales analysis start date in YYYY-MM-DD."),
+      end_date: z.string().describe("Sales analysis end date in YYYY-MM-DD."),
+      horizon_days: z.number().int().positive().optional().default(14),
+      low_stock_threshold: z.number().int().positive().optional().default(5),
+      max_products: z.number().int().positive().optional().default(50),
+    }),
+    handler: forecastReorderCandidates,
   },
 ];
 
