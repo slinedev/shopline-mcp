@@ -4,7 +4,7 @@
 
 Shopline Open API 的 MCP server，npm 套件名稱為 `shopline-mcp`。
 
-此套件將 Shopline Open API 封裝成 143 個 AI 可呼叫工具（75 個讀取 + 68 個寫入），可用於電商資料分析與商店操作。Server 使用 stdio transport，可接 Claude Code、Claude Desktop、Codex 與其他 MCP client。
+此套件將 Shopline Open API 封裝成 143 個 AI 可呼叫的業務工具（75 個讀取 + 68 個寫入），可用於電商資料分析與商店操作。另提供 6 個輔助工具，用於能力查詢、工作流建議、寫入預覽與多商店設定檢查。Server 使用 stdio transport，可接 Claude Code、Claude Desktop、Codex 與其他 MCP client。
 
 本專案參考自採用 MIT 授權的 Python 專案 [asgard-ai-platform/mcp-shopline](https://github.com/asgard-ai-platform/mcp-shopline)，並重構為 TypeScript/Node.js 版本。
 
@@ -19,8 +19,10 @@ Shopline Open API 的 MCP server，npm 套件名稱為 `shopline-mcp`。
 - **143 個即用工具**：涵蓋訂單、商品、庫存、客戶、促銷、分類、訂閱、客服對話、評價與商店設定
 - **75 個讀取工具**：查詢與分析 Shopline 資料
 - **68 個寫入工具**：建立、更新、刪除 Shopline 資源
+- **6 個輔助工具**：搜尋工具、推薦工作流、預覽寫入、檢查 store alias
 - **MCP stdio server**：可接本機 AI client
 - **內建 API 處理**：認證、分頁、重試、日期區間與 DELETE JSON body
+- **多商店路由**：設定 `SHOPLINE_STORES_JSON` 後，可用 `store_alias` 指定店鋪
 - **適合 AI Agent 使用**：結構化 JSON 輸出，日期參數使用 `YYYY-MM-DD`
 
 ## API 參考文件
@@ -53,6 +55,14 @@ npx shopline-mcp
 export SHOPLINE_API_TOKEN=your_token_here
 ```
 
+若要配置多個商店，可設定 alias：
+
+```bash
+export SHOPLINE_STORES_JSON='{"tw":{"token":"tw_token"},"hk":{"token":"hk_token"}}'
+```
+
+之後在任一 Shopline 業務工具中傳入 `store_alias` 即可指定店鋪。
+
 ### 搭配 Claude Code 使用
 
 ```bash
@@ -82,8 +92,11 @@ claude mcp add --transport stdio shopline -e SHOPLINE_API_TOKEN=your_token_here 
 - 請使用最小必要權限的 token
 - 寫入工具都以 `[WRITE]` 標示
 - 寫入工具描述包含 `【副作用】` 說明
+- 寫入工具可傳入 `dry_run: true`，只預覽 API method、path、參數與 body，不修改商店資料
 
-## 工具清單（143 個）
+## 工具清單（149 個）
+
+此 server 提供 143 個 Shopline API 業務工具，以及 6 個輔助工具。
 
 ### 讀取工具（75 個）
 
@@ -114,15 +127,27 @@ claude mcp add --transport stdio shopline -e SHOPLINE_API_TOKEN=your_token_here 
 | 媒體與自訂欄位 | 上傳媒體與建立 metafield |
 | 物流與商家 | 更新訂單物流、自取門市與商家設定 |
 
+### 輔助工具（6 個）
+
+| 工具 | 用途 |
+|------|------|
+| `describe_shopline_mcp_capabilities` | 摘要目前覆蓋範圍、領域與安全功能 |
+| `find_shopline_tools` | 依任務、關鍵字、領域或讀寫模式搜尋工具 |
+| `explain_shopline_tool` | 解釋單一工具的參數、端點與安全注意事項 |
+| `recommend_shopline_workflow` | 依商家任務推薦工具順序，例如銷售報告或庫存風險 |
+| `preview_shopline_write_tool` | 不呼叫 Shopline，先預覽寫入工具 |
+| `list_shopline_store_profiles` | 列出已配置的 store alias，不顯示 token |
+
 ## API 端點覆蓋範圍
 
 目前套件覆蓋：
 
-- 共 143 個工具
+- 共 149 個工具
+- 143 個 Shopline API 業務工具
 - 75 個讀取工具
 - 68 個寫入工具
 - 135 個 endpoint key
-- 135 個 method/path endpoint
+- 137 個 method/path endpoint
 
 實際 endpoint 是否可用仍取決於 Shopline token 權限。
 
@@ -179,6 +204,23 @@ create_customer(
   name = "Alice",
   email = "alice@example.com"
 )
+```
+
+### 「先預覽寫入，不直接修改商店」
+
+```text
+create_customer(
+  name = "Alice",
+  email = "alice@example.com",
+  dry_run = true
+)
+```
+
+### 「我該用哪個工具？」
+
+```text
+find_shopline_tools(query = "low stock", mode = "read")
+recommend_shopline_workflow(task = "Prepare a weekly sales report")
 ```
 
 ## 授權

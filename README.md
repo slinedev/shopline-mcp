@@ -4,7 +4,7 @@
 
 An MCP server for the Shopline Open API, published as `shopline-mcp` on npm.
 
-It wraps the Shopline Open API into 143 AI-callable tools (75 read + 68 write) for e-commerce data analysis and store operations. It runs over stdio, so it works with Claude Code, Claude Desktop, Codex, and other MCP-compatible clients.
+It wraps the Shopline Open API into 143 AI-callable business tools (75 read + 68 write) for e-commerce data analysis and store operations. It also includes 6 assistant tools for capability discovery, workflow guidance, write previews, and multi-store configuration checks. It runs over stdio, so it works with Claude Code, Claude Desktop, Codex, and other MCP-compatible clients.
 
 This TypeScript/Node.js package was rebuilt with reference to the MIT-licensed Python project [asgard-ai-platform/mcp-shopline](https://github.com/asgard-ai-platform/mcp-shopline).
 
@@ -19,8 +19,10 @@ This TypeScript/Node.js package was rebuilt with reference to the MIT-licensed P
 - **143 ready-to-use tools** covering orders, products, inventory, customers, promotions, categories, subscriptions, conversations, reviews, and store settings
 - **75 read tools** for querying and analyzing Shopline data
 - **68 write tools** for creating, updating, and deleting Shopline resources
+- **6 assistant tools** for tool search, workflow recommendations, write previews, and store alias checks
 - **MCP stdio server** for local AI clients
 - **Built-in API handling** for authentication, pagination, retry, date windows, and DELETE requests with JSON bodies
+- **Multi-store routing** with optional `store_alias` when `SHOPLINE_STORES_JSON` is configured
 - **Agent-friendly output** with structured JSON and natural parameters such as `YYYY-MM-DD` dates
 
 ## API Reference
@@ -53,6 +55,14 @@ Set your API token before starting the server:
 export SHOPLINE_API_TOKEN=your_token_here
 ```
 
+For multiple stores, configure aliases:
+
+```bash
+export SHOPLINE_STORES_JSON='{"tw":{"token":"tw_token"},"hk":{"token":"hk_token"}}'
+```
+
+Then pass `store_alias` to any Shopline business tool.
+
 ### Use with Claude Code
 
 ```bash
@@ -82,8 +92,11 @@ This server includes tools that can create, update, or delete data in your Shopl
 - Use the narrowest token permissions possible
 - Write tools are marked with `[WRITE]`
 - Write descriptions include a `【副作用】` side-effect section
+- Pass `dry_run: true` to a write tool to preview the API method, path, parameters, and body without changing store data
 
-## Tools (143)
+## Tools (149 total)
+
+This server exposes 143 Shopline API business tools plus 6 assistant tools.
 
 ### Read Tools (75)
 
@@ -114,15 +127,27 @@ This server includes tools that can create, update, or delete data in your Shopl
 | Media & Metafields | Upload media and create metafields |
 | Delivery & Merchant | Update order delivery, pickup store, and merchant settings |
 
+### Assistant Tools (6)
+
+| Tool | Purpose |
+|------|---------|
+| `describe_shopline_mcp_capabilities` | Summarize current coverage, domains, and safety features |
+| `find_shopline_tools` | Search tools by task, keyword, domain, or read/write mode |
+| `explain_shopline_tool` | Explain a specific tool's parameters, endpoints, and safety notes |
+| `recommend_shopline_workflow` | Recommend tool sequences for merchant tasks such as sales reports or inventory risk |
+| `preview_shopline_write_tool` | Preview a write tool without calling Shopline |
+| `list_shopline_store_profiles` | List configured store aliases without exposing tokens |
+
 ## API Endpoint Coverage
 
 The package currently covers:
 
-- 143 tools total
+- 149 tools total
+- 143 Shopline API business tools
 - 75 read tools
 - 68 write tools
 - 135 endpoint keys mapped in the local endpoint table
-- 135 documented method/path endpoints
+- 137 documented method/path endpoints
 
 Endpoint availability still depends on your Shopline token permissions.
 
@@ -179,6 +204,23 @@ create_customer(
   name = "Alice",
   email = "alice@example.com"
 )
+```
+
+### "Preview a write before changing the store"
+
+```text
+create_customer(
+  name = "Alice",
+  email = "alice@example.com",
+  dry_run = true
+)
+```
+
+### "Which tool should I use?"
+
+```text
+find_shopline_tools(query = "low stock", mode = "read")
+recommend_shopline_workflow(task = "Prepare a weekly sales report")
 ```
 
 ## License

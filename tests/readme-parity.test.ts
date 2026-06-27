@@ -10,7 +10,7 @@ const englishSections = [
   "API Reference",
   "Quick Start",
   "Important: Write Tools",
-  "Tools (143)",
+  "Tools (149 total)",
   "API Endpoint Coverage",
   "API Constraints",
   "Usage Examples",
@@ -22,7 +22,7 @@ const zhSections = [
   "API 參考文件",
   "快速開始",
   "重要：寫入工具",
-  "工具清單（143 個）",
+  "工具清單（149 個）",
   "API 端點覆蓋範圍",
   "API 限制",
   "使用範例",
@@ -39,11 +39,14 @@ describe("README Python parity", () => {
 
     expect(english).toContain("npm install shopline-mcp");
     expect(english).toContain("npx shopline-mcp");
+    expect(english).toContain("6 assistant tools");
+    expect(english).toContain("dry_run: true");
+    expect(english).toContain("SHOPLINE_STORES_JSON");
     expect(english).toContain(
       "rebuilt with reference to the MIT-licensed Python project [asgard-ai-platform/mcp-shopline](https://github.com/asgard-ai-platform/mcp-shopline)",
     );
     expect(english).toContain("Reference Python project (MIT): [asgard-ai-platform/mcp-shopline](https://github.com/asgard-ai-platform/mcp-shopline)");
-    expect(english).toContain("135 documented method/path endpoints");
+    expect(english).toContain("137 documented method/path endpoints");
     expect(english).not.toContain("## Project Structure");
     expect(english).not.toContain("## Development");
     expect(english).not.toContain("## Known Test Gaps");
@@ -61,9 +64,12 @@ describe("README Python parity", () => {
 
     expect(traditionalChinese).toContain("npm install shopline-mcp");
     expect(traditionalChinese).toContain("npx shopline-mcp");
+    expect(traditionalChinese).toContain("6 個輔助工具");
+    expect(traditionalChinese).toContain("dry_run: true");
+    expect(traditionalChinese).toContain("SHOPLINE_STORES_JSON");
     expect(traditionalChinese).toContain("參考自採用 MIT 授權的 Python 專案 [asgard-ai-platform/mcp-shopline](https://github.com/asgard-ai-platform/mcp-shopline)");
     expect(traditionalChinese).toContain("參考 Python 專案（MIT）：[asgard-ai-platform/mcp-shopline](https://github.com/asgard-ai-platform/mcp-shopline)");
-    expect(traditionalChinese).toContain("135 個 method/path endpoint");
+    expect(traditionalChinese).toContain("137 個 method/path endpoint");
     expect(traditionalChinese).not.toContain("## 專案結構");
     expect(traditionalChinese).not.toContain("## 開發");
     expect(traditionalChinese).not.toContain("## 已知測試缺口");
@@ -82,6 +88,9 @@ describe("README Python parity", () => {
     expect(dev).toContain("npm run verify");
     expect(dev).toContain("npm pack --dry-run");
     expect(dev).toContain("SHOPLINE_TEST_WRITES=1");
+    expect(dev).toContain("SHOPLINE_STORES_JSON");
+    expect(dev).toContain("store_alias");
+    expect(dev).toContain("assistant tools");
     expect(dev).toContain("tests/fixtures/python-tool-baseline.json");
     expect(dev).not.toContain("## 專案結構");
     expect(dev).not.toContain("## 開發計畫");

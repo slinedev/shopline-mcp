@@ -1,7 +1,7 @@
 {
   "name": "shopline-mcp",
-  "version": "1.1.0",
-  "description": "MCP server wrapping the Shopline Open API into AI-callable tools for e-commerce analysis and operations.",
+  "version": "1.2.0",
+  "description": "An MCP server for the Shopline Open API, providing AI-callable tools for e-commerce analysis and operations.",
   "type": "module",
   "license": "MIT",
   "author": "Asgard AI Platform",

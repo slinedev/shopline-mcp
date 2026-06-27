@@ -11,7 +11,7 @@ function normalize(method: string, path: string): string {
 }
 
 function inventoryEndpoints(): Set<string> {
-  const content = readFileSync("reference/shopline-api-inventory.md", "utf8");
+  const content = readFileSync("tests/fixtures/shopline-api-inventory.md", "utf8");
   const endpoints = new Set<string>();
   for (const match of content.matchAll(endpointPattern)) {
     endpoints.add(normalize(match[1] ?? "", match[2] ?? ""));
@@ -30,7 +30,7 @@ describe("Shopline endpoint coverage", () => {
     }
 
     const uncovered = [...inventory].filter((endpoint) => !covered.has(endpoint));
-    expect(inventory.size).toBe(136);
+    expect(inventory.size).toBe(137);
     expect(uncovered).toEqual([]);
   });
 });

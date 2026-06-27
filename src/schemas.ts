@@ -2,6 +2,10 @@ import { z } from "zod";
 
 import type { ParamSpec } from "./types.js";
 
+interface BuildInputOptions {
+  readonly write?: boolean;
+}
+
 function schemaForParam(param: ParamSpec): z.ZodTypeAny {
   let schema: z.ZodTypeAny;
 
@@ -50,5 +54,35 @@ export function buildInputSchema(params: readonly ParamSpec[]): z.ZodObject<Reco
   for (const param of params) {
     shape[param.name] = schemaForParam(param);
   }
+  return z.object(shape);
+}
+
+export function buildToolInputSchema(
+  params: readonly ParamSpec[],
+  options: BuildInputOptions = {},
+): z.ZodObject<Record<string, z.ZodTypeAny>> {
+  const shape: Record<string, z.ZodTypeAny> = {};
+  for (const param of params) {
+    shape[param.name] = schemaForParam(param);
+  }
+
+  shape.store_alias = z
+    .string()
+    .optional()
+    .describe("Optional store alias from SHOPLINE_STORES_JSON for multi-store routing.");
+
+  if (options.write) {
+    shape.dry_run = z
+      .boolean()
+      .optional()
+      .default(false)
+      .describe("When true, return a write preview without calling the Shopline API.");
+    shape.confirm_write = z
+      .boolean()
+      .optional()
+      .default(false)
+      .describe("Optional caller-side confirmation marker for write tools.");
+  }
+
   return z.object(shape);
 }
