@@ -19,3 +19,4 @@ CONTRIBUTING.md
 .playwright-cli
 output
 .vscode
+.reasonix

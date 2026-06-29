@@ -93,3 +93,19 @@ export function toToolError(error: unknown): CallToolResult {
 }
 
 export const VALID_ORDER_STATUSES = new Set(["completed", "confirmed"]);
+
+export function dateRangeDays(startDate: string, endDate: string): number {
+  const days = daysBetween(parseDate(`${startDate}T00:00:00Z`), parseDate(`${endDate}T00:00:00Z`));
+  return days || 1;
+}
+
+export function periodParams(startDate: string, endDate: string): Record<string, string> {
+  return {
+    created_after: `${startDate}T00:00:00Z`,
+    created_before: `${endDate}T23:59:59Z`,
+  };
+}
+
+export function orderItemProductId(item: Record<string, unknown>): string {
+  return String(item.item_id ?? item.product_id ?? asRecord(item.object_data).product_id ?? "");
+}

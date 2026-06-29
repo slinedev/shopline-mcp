@@ -4,7 +4,7 @@
 
 An MCP server for the Shopline Open API, published as `shopline-mcp` on npm.
 
-It wraps the Shopline Open API into 143 AI-callable business tools (75 read + 68 write) for e-commerce data analysis and store operations. It also includes 10 assistant tools for capability discovery, workflow guidance, write previews, Human in the loop approval, product content audits, SEO/GEO readiness checks, reorder forecasting, and multi-store configuration checks. It runs over stdio, so it works with Claude Code, Claude Desktop, Codex, and other MCP-compatible clients.
+It wraps the Shopline Open API into 269 AI-callable business tools (124 read + 145 write) for e-commerce data analysis and store operations. It also includes 10 assistant tools for capability discovery, workflow guidance, write previews, Human in the loop approval, product content audits, SEO/GEO readiness checks, reorder forecasting, and multi-store configuration checks. It runs over stdio, so it works with Claude Code, Claude Desktop, Codex, and other MCP-compatible clients.
 
 This is a third-party open-source package, not an official SHOPLINE product. This TypeScript/Node.js package was rebuilt with reference to the MIT-licensed Python project [asgard-ai-platform/mcp-shopline](https://github.com/asgard-ai-platform/mcp-shopline).
 
@@ -16,9 +16,9 @@ This is a third-party open-source package, not an official SHOPLINE product. Thi
 
 ## What This Does
 
-- **143 ready-to-use tools** covering orders, products, inventory, customers, promotions, categories, subscriptions, conversations, reviews, and store settings
-- **75 read tools** for querying and analyzing Shopline data
-- **68 write tools** for creating, updating, and deleting Shopline resources
+- **269 ready-to-use tools** covering orders, products, inventory, customers, promotions, categories, subscriptions, conversations, reviews, store settings, webhooks, live sales, user coupons, wish lists, staff, purchase/return order operations, and metafields
+- **124 read tools** for querying and analyzing Shopline data
+- **145 write tools** for creating, updating, and deleting Shopline resources
 - **10 assistant tools** for tool search, workflow recommendations, write previews, Human in the loop approval, content/SEO audits, reorder forecasting, and store alias checks
 - **MCP stdio server** for local AI clients
 - **Built-in API handling** for authentication, pagination, retry, date windows, and DELETE requests with JSON bodies
@@ -96,23 +96,23 @@ This server includes tools that can create, update, or delete data in your Shopl
 - Dry-run previews include an `approval_code` for Human in the loop review
 - Set `SHOPLINE_REQUIRE_WRITE_APPROVAL=1` to require the matching `approval_code` before any write tool can run
 
-## Tools (153 total)
+## Tools (279 total)
 
-This server exposes 143 Shopline API business tools plus 10 assistant tools.
+This server exposes 269 Shopline API business tools plus 10 assistant tools.
 
-### Read Tools (75)
+### Read Tools (124)
 
 | Domain | Coverage |
 |--------|----------|
 | Orders | Query orders, sales summary, top products, trends, channel comparison, order detail, refunds, archived orders, labels, tags, logs, transactions |
-| Products & Inventory | Product list, variants, inventory overview, low stock alerts, warehouses, warehouse stock, locked inventory, purchase orders |
+| Products & Inventory | Product list, variants, inventory overview, low stock alerts, warehouses, warehouse stock, locked inventory, purchase orders, product metafields |
 | Analytics | RFM, repurchase, customer geography, inventory turnover, category sales, promotion analysis, refund by store, transfer suggestions, promotion ROI, lifecycle, slow movers |
-| Customers | Customers, profiles, groups, group members, store credits, membership tiers, tier history, point rules, custom fields |
-| Categories & Promotions | Category tree/detail, promotions, flash price campaigns, affiliate campaigns, gifts, add-on products, subscriptions |
-| Order Extended | Return orders, order delivery, conversations, conversation messages, product reviews |
-| Store Settings | Merchants, payments, delivery options, channels, app settings, taxes, staff permissions, token info, agents |
+| Customers | Customers, profiles, groups, group members, store credits, membership tiers, tier history, point rules, custom fields, user coupons, wish lists, customer metafields |
+| Categories & Promotions | Category tree/detail, promotions, coupon center, flash price campaigns, affiliate campaigns, gifts, add-on products, subscriptions |
+| Order Extended | Return orders, order delivery, conversations, conversation messages, product reviews, live sales, order metafields |
+| Store Settings | Merchants, payments, delivery options, channels, app settings, expanded settings, taxes, staff, token info, agents, webhooks |
 
-### Write Tools (68)
+### Write Tools (145)
 
 | Domain | Coverage |
 |--------|----------|
@@ -121,13 +121,14 @@ This server exposes 143 Shopline API business tools plus 10 assistant tools.
 | Product Operations | Create, update, delete, variants, quantity, price, tags, images, bulk updates, category assignment |
 | Promotions | Promotions, coupons, flash price campaigns, affiliate campaigns |
 | Categories | Create, update, delete |
-| Return Orders | Create and update return orders |
+| Return Orders | Create, update, inspect, add notes, and update delivery status |
 | Conversations | Send order and shop messages |
 | Reviews | Create, bulk create, update, bulk update, delete, bulk delete |
 | Gifts & Add-ons | Create, update, and quantity operations |
-| Purchase Orders | Create and delete purchase orders |
-| Media & Metafields | Upload media and create metafields |
-| Delivery & Merchant | Update order delivery, pickup store, and merchant settings |
+| Purchase Orders | Create, update, create child purchase orders, delete, and bulk delete |
+| Media & Metafields | Upload media and create, update, delete, and bulk manage selected metafields |
+| Delivery & Merchant | Update order delivery, pickup store, merchant settings, domains, theme/layout drafts, and publish settings |
+| Webhooks & Live Sales | Create/update/delete webhooks and manage live sale products |
 
 ### Assistant Tools (10)
 
@@ -148,12 +149,14 @@ This server exposes 143 Shopline API business tools plus 10 assistant tools.
 
 The package currently covers:
 
-- 153 tools total
-- 143 Shopline API business tools
-- 75 read tools
-- 68 write tools
-- 135 endpoint keys mapped in the local endpoint table
-- 137 documented method/path endpoints
+- 279 tools total
+- 269 Shopline API business tools
+- 124 read tools
+- 145 write tools
+- 206 endpoint keys mapped in the local endpoint table
+- 263 documented method/path endpoints
+
+This is selected v1.4 merchant-operations coverage, not full coverage of every reference endpoint in the official documentation. Cart, Storefront/OAuth, and cart item metafield endpoints remain outside the current release scope.
 
 Endpoint availability still depends on your Shopline token permissions.
 

@@ -4,7 +4,7 @@
 
 Shopline Open API 的 MCP server，npm 套件名稱為 `shopline-mcp`。
 
-此套件將 Shopline Open API 封裝成 143 個 AI 可呼叫的業務工具（75 個讀取 + 68 個寫入），可用於電商資料分析與商店操作。另提供 10 個輔助工具，用於能力查詢、工作流建議、寫入預覽、Human in the loop 審核、商品內容檢查、SEO/GEO 準備度檢查、補貨預測與多商店設定檢查。Server 使用 stdio transport，可接 Claude Code、Claude Desktop、Codex 與其他 MCP client。
+此套件將 Shopline Open API 封裝成 269 個 AI 可呼叫的業務工具（124 個讀取 + 145 個寫入），可用於電商資料分析與商店操作。另提供 10 個輔助工具，用於能力查詢、工作流建議、寫入預覽、Human in the loop 審核、商品內容檢查、SEO/GEO 準備度檢查、補貨預測與多商店設定檢查。Server 使用 stdio transport，可接 Claude Code、Claude Desktop、Codex 與其他 MCP client。
 
 本專案是第三方開源套件，並非 SHOPLINE 官方產品。本專案參考自採用 MIT 授權的 Python 專案 [asgard-ai-platform/mcp-shopline](https://github.com/asgard-ai-platform/mcp-shopline)，並重構為 TypeScript/Node.js 版本。
 
@@ -16,9 +16,9 @@ Shopline Open API 的 MCP server，npm 套件名稱為 `shopline-mcp`。
 
 ## 功能特色
 
-- **143 個即用工具**：涵蓋訂單、商品、庫存、客戶、促銷、分類、訂閱、客服對話、評價與商店設定
-- **75 個讀取工具**：查詢與分析 Shopline 資料
-- **68 個寫入工具**：建立、更新、刪除 Shopline 資源
+- **269 個即用工具**：涵蓋訂單、商品、庫存、客戶、促銷、分類、訂閱、客服對話、評價、商店設定、Webhooks、直播銷售、User Coupons、追蹤清單、員工、採購/退貨進階操作與 metafields
+- **124 個讀取工具**：查詢與分析 Shopline 資料
+- **145 個寫入工具**：建立、更新、刪除 Shopline 資源
 - **10 個輔助工具**：搜尋工具、推薦工作流、預覽寫入、Human in the loop 審核、內容/SEO 檢查、補貨預測、檢查 store alias
 - **MCP stdio server**：可接本機 AI client
 - **內建 API 處理**：認證、分頁、重試、日期區間與 DELETE JSON body
@@ -96,23 +96,23 @@ claude mcp add --transport stdio shopline -e SHOPLINE_API_TOKEN=your_token_here 
 - dry-run 預覽會回傳 `approval_code`，供 Human in the loop 人工審閱
 - 設定 `SHOPLINE_REQUIRE_WRITE_APPROVAL=1` 後，寫入工具必須帶入相符的 `approval_code` 才能執行
 
-## 工具清單（153 個）
+## 工具清單（279 個）
 
-此 server 提供 143 個 Shopline API 業務工具，以及 10 個輔助工具。
+此 server 提供 269 個 Shopline API 業務工具，以及 10 個輔助工具。
 
-### 讀取工具（75 個）
+### 讀取工具（124 個）
 
 | 領域 | 覆蓋內容 |
 |------|----------|
 | 訂單 | 訂單查詢、銷售摘要、暢銷商品、趨勢、通路比較、訂單詳情、退款、封存訂單、標籤、日誌、交易 |
-| 商品與庫存 | 商品列表、變體、庫存總覽、低庫存警示、倉庫、倉庫庫存、鎖定庫存、採購單 |
+| 商品與庫存 | 商品列表、變體、庫存總覽、低庫存警示、倉庫、倉庫庫存、鎖定庫存、採購單、商品 metafields |
 | 分析 | RFM、回購、客戶地區、庫存周轉、分類銷售、促銷分析、門市退貨、調撥建議、促銷 ROI、生命週期、滯銷商品 |
-| 客戶 | 客戶列表、客戶完整資料、客戶群組、群組成員、購物金、會員等級、等級歷史、點數規則、自訂欄位 |
-| 分類與促銷 | 分類樹、分類詳情、促銷、限時特賣、聯盟活動、贈品、加購品、商品訂閱 |
-| 訂單延伸 | 退貨單、訂單物流、客服對話、對話訊息、商品評價 |
-| 商店設定 | 商家、付款方式、物流選項、通路、App 設定、稅務、員工權限、Token 資訊、客服人員 |
+| 客戶 | 客戶列表、客戶完整資料、客戶群組、群組成員、購物金、會員等級、等級歷史、點數規則、自訂欄位、User Coupons、追蹤清單、顧客 metafields |
+| 分類與促銷 | 分類樹、分類詳情、促銷、優惠券中心、限時特賣、聯盟活動、贈品、加購品、商品訂閱 |
+| 訂單延伸 | 退貨單、訂單物流、客服對話、對話訊息、商品評價、直播銷售、訂單 metafields |
+| 商店設定 | 商家、付款方式、物流選項、通路、App 設定、擴充設定、稅務、員工、Token 資訊、客服人員、Webhooks |
 
-### 寫入工具（68 個）
+### 寫入工具（145 個）
 
 | 領域 | 覆蓋內容 |
 |------|----------|
@@ -121,13 +121,14 @@ claude mcp add --transport stdio shopline -e SHOPLINE_API_TOKEN=your_token_here 
 | 商品操作 | 建立、更新、刪除、變體、庫存、價格、標籤、圖片、批次更新、分類指派 |
 | 促銷活動 | 促銷、優惠券、限時特賣、聯盟活動 |
 | 分類 | 建立、更新、刪除分類 |
-| 退貨單 | 建立與更新退貨單 |
+| 退貨單 | 建立、更新、驗貨、新增備註與更新退貨物流狀態 |
 | 客服對話 | 發送訂單訊息與商店訊息 |
 | 評價 | 建立、批次建立、更新、批次更新、刪除、批次刪除 |
 | 贈品與加購 | 建立、更新與庫存數量操作 |
-| 採購單 | 建立與刪除採購單 |
-| 媒體與自訂欄位 | 上傳媒體與建立 metafield |
-| 物流與商家 | 更新訂單物流、自取門市與商家設定 |
+| 採購單 | 建立、更新、建立子採購單、刪除與批次刪除 |
+| 媒體與自訂欄位 | 上傳媒體，以及建立、更新、刪除與批次管理選定 metafields |
+| 物流與商家 | 更新訂單物流、自取門市、商家設定、網域、主題/版面草稿與發布設定 |
+| Webhooks 與直播銷售 | 建立/更新/刪除 Webhook，管理直播商品 |
 
 ### 輔助工具（10 個）
 
@@ -148,12 +149,14 @@ claude mcp add --transport stdio shopline -e SHOPLINE_API_TOKEN=your_token_here 
 
 目前套件覆蓋：
 
-- 共 153 個工具
-- 143 個 Shopline API 業務工具
-- 75 個讀取工具
-- 68 個寫入工具
-- 135 個 endpoint key
-- 137 個 method/path endpoint
+- 共 279 個工具
+- 269 個 Shopline API 業務工具
+- 124 個讀取工具
+- 145 個寫入工具
+- 206 個 endpoint key
+- 263 個 method/path endpoint
+
+這是 v1.4 選定的商家營運核心覆蓋，不代表官方文件中所有 reference endpoint 都已完整覆蓋。Cart、Storefront/OAuth 與 cart item metafield endpoint 仍不在本版範圍內。
 
 實際 endpoint 是否可用仍取決於 Shopline token 權限。
 

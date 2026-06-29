@@ -10,7 +10,7 @@ const englishSections = [
   "API Reference",
   "Quick Start",
   "Important: Write Tools",
-  "Tools (153 total)",
+  "Tools (279 total)",
   "API Endpoint Coverage",
   "API Constraints",
   "Usage Examples",
@@ -22,7 +22,7 @@ const zhSections = [
   "API 參考文件",
   "快速開始",
   "重要：寫入工具",
-  "工具清單（153 個）",
+  "工具清單（279 個）",
   "API 端點覆蓋範圍",
   "API 限制",
   "使用範例",
@@ -50,7 +50,7 @@ describe("README Python parity", () => {
       "rebuilt with reference to the MIT-licensed Python project [asgard-ai-platform/mcp-shopline](https://github.com/asgard-ai-platform/mcp-shopline)",
     );
     expect(english).toContain("Reference Python project (MIT): [asgard-ai-platform/mcp-shopline](https://github.com/asgard-ai-platform/mcp-shopline)");
-    expect(english).toContain("137 documented method/path endpoints");
+    expect(english).toContain("263 documented method/path endpoints");
     expect(english).not.toContain("## Project Structure");
     expect(english).not.toContain("## Development");
     expect(english).not.toContain("## Known Test Gaps");
@@ -77,7 +77,7 @@ describe("README Python parity", () => {
     expect(traditionalChinese).toContain("SHOPLINE_STORES_JSON");
     expect(traditionalChinese).toContain("參考自採用 MIT 授權的 Python 專案 [asgard-ai-platform/mcp-shopline](https://github.com/asgard-ai-platform/mcp-shopline)");
     expect(traditionalChinese).toContain("參考 Python 專案（MIT）：[asgard-ai-platform/mcp-shopline](https://github.com/asgard-ai-platform/mcp-shopline)");
-    expect(traditionalChinese).toContain("137 個 method/path endpoint");
+    expect(traditionalChinese).toContain("263 個 method/path endpoint");
     expect(traditionalChinese).not.toContain("## 專案結構");
     expect(traditionalChinese).not.toContain("## 開發");
     expect(traditionalChinese).not.toContain("## 已知測試缺口");

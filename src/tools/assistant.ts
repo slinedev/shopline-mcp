@@ -3,13 +3,13 @@ import { z } from "zod";
 
 import { fetchAllPages } from "../client.js";
 import { getConfiguredStoreProfiles, withShoplineStore } from "../config.js";
-import { toolSpecs } from "../generated/toolSpecs.js";
-import { asArray, asRecord, daysBetween, getTranslation, parseDate, round, sumQuantity, VALID_ORDER_STATUSES } from "../shared/helpers.js";
+import { asArray, asRecord, dateRangeDays, daysBetween, getTranslation, orderItemProductId, parseDate, periodParams, round, sumQuantity, VALID_ORDER_STATUSES } from "../shared/helpers.js";
 import { toToolError, toToolResult } from "../shared/helpers.js";
 import type { ToolSpec } from "../types.js";
 import { buildWritePreview } from "./operationPlan.js";
+import { ALL_SHOPLINE_TOOL_SPECS } from "./specs.js";
 
-const BUSINESS_TOOL_SPECS = toolSpecs as readonly ToolSpec[];
+const BUSINESS_TOOL_SPECS = ALL_SHOPLINE_TOOL_SPECS as readonly ToolSpec[];
 
 export const ASSISTANT_TOOL_NAMES = [
   "describe_shopline_mcp_capabilities",
@@ -292,6 +292,27 @@ const WORKFLOWS = [
     ],
     required_inputs: ["start_date", "end_date", "horizon_days", "low_stock_threshold"],
   },
+  {
+    name: "webhook_setup",
+    keywords: ["webhook", "integration", "event", "sync", "訂閱", "订阅", "事件", "集成", "整合"],
+    steps: [
+      { tool: "list_webhooks", why: "Check existing webhooks to avoid duplicate subscriptions." },
+      { tool: "prepare_shopline_write_approval", why: "Preview the webhook creation request before applying." },
+      { tool: "create_webhook", why: "Register a new webhook destination for store events." },
+    ],
+    required_inputs: ["topic", "address", "format"],
+  },
+  {
+    name: "live_sales_management",
+    keywords: ["live", "stream", "sale", "social", "直播", "銷售", "销售", "社群"],
+    steps: [
+      { tool: "list_sale_products", why: "View products currently available in the live sale." },
+      { tool: "get_sale_comments", why: "Retrieve customer comments and interactions from the stream." },
+      { tool: "get_sale_customers", why: "Identify customers engaged in the live sale." },
+      { tool: "prepare_shopline_write_approval", why: "Preview product additions or status changes before applying." },
+    ],
+    required_inputs: ["sale_id"],
+  },
 ];
 
 function recommendWorkflow(args: Record<string, unknown>): Record<string, unknown> {
@@ -418,17 +439,7 @@ function productSku(product: Record<string, unknown>): string {
   return hasText(sku) ? String(sku) : "";
 }
 
-function dateRangeDays(startDate: string, endDate: string): number {
-  const days = daysBetween(parseDate(`${startDate}T00:00:00Z`), parseDate(`${endDate}T00:00:00Z`));
-  return days || 1;
-}
 
-function periodParams(startDate: string, endDate: string): Record<string, string> {
-  return {
-    created_after: `${startDate}T00:00:00Z`,
-    created_before: `${endDate}T23:59:59Z`,
-  };
-}
 
 async function fetchProducts(limit: number): Promise<Record<string, unknown>[]> {
   const pages = Math.max(1, Math.ceil(limit / 50));
@@ -527,9 +538,7 @@ async function auditSeoReadiness(args: Record<string, unknown>): Promise<Record<
   };
 }
 
-function orderItemProductId(item: Record<string, unknown>): string {
-  return String(item.item_id ?? item.product_id ?? asRecord(item.object_data).product_id ?? "");
-}
+
 
 async function fetchRevenueOrders(startDate: string, endDate: string): Promise<Record<string, unknown>[]> {
   const orders = await fetchAllPages("orders_search", periodParams(startDate, endDate), undefined, 20);

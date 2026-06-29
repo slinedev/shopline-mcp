@@ -3,14 +3,17 @@ import {
   asArray,
   asRecord,
   dateOnly,
+  dateRangeDays,
   daysBetween,
   getTranslation,
   increment,
   itemsFrom,
   moneyToFloat,
+  orderItemProductId,
   pageCountForLimit,
   parseDate,
   percent,
+  periodParams,
   round,
   sortObjectByValueDesc,
   sumQuantity,
@@ -46,14 +49,9 @@ function maxResultsArg(args: Args, fallback = 50): number {
   return Number.isFinite(value) && value > 0 ? Math.floor(value) : fallback;
 }
 
-function dateRangeDays(startDate: string, endDate: string): number {
-  const days = daysBetween(parseDate(`${startDate}T00:00:00Z`), parseDate(`${endDate}T00:00:00Z`));
-  return days || 1;
-}
 
-function orderItemProductId(item: Record<string, unknown>): string {
-  return String(item.item_id ?? item.product_id ?? asRecord(item.object_data).product_id ?? "");
-}
+
+
 
 function stockQuantity(product: Record<string, unknown>): number {
   const variations = asArray(product.variations);
@@ -78,12 +76,7 @@ function stockVariations(stockData: Record<string, unknown>): Record<string, unk
   ];
 }
 
-function periodParams(startDate: string, endDate: string): Record<string, string> {
-  return {
-    created_after: `${startDate}T00:00:00Z`,
-    created_before: `${endDate}T23:59:59Z`,
-  };
-}
+
 
 async function searchOrders(startDate: string, endDate: string, maxPages = 200): Promise<Record<string, unknown>[]> {
   return fetchAllPages("orders_search", periodParams(startDate, endDate), undefined, maxPages);

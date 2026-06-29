@@ -83,6 +83,7 @@ npm pack --dry-run
 - 保留 75 个读取工具和 68 个写入工具的拆分。
 - 保留工具名、参数、说明、读写标记和 endpoint 映射。
 - 10 个 assistant tools 不属于 Python parity 基线，因此 `SHOPLINE_TOOL_SPECS` 仍只统计 143 个业务工具。
+- v1.4 新增工具是追加层，放在 `src/v14/`；实际注册使用 `ALL_SHOPLINE_TOOL_SPECS`，不要把 v1.4 工具混入 Python parity fixture。
 - `tests/fixtures/python-tool-baseline.json` 是从 Python 项目生成的基线 fixture，用于本地测试，不会进入 npm 包。
 - `npm pack --dry-run --json` 应确认发布包只包含 `dist/`、README、license 和 `package.json` 等发布文件。
 
@@ -98,7 +99,8 @@ npm pack --dry-run
 8. 读取工具应在 MCP annotations 中标记为 read-only；写入工具应标记为 non-read-only 和 destructive。
 9. 运行时参数 `store_alias`、`dry_run`、`confirm_write`、`approval_code` 不属于 Shopline API 参数，不能透传到 query 或 body。
 10. 新增 assistant tools 时放在 `src/tools/assistant.ts`，不要混入 Python parity 业务工具清单。
-11. Human in the loop 工具只负责生成审阅清单、草稿和写入预览；不要在审查工具中直接执行写入。
+11. v1.4 以后新增的单纯 endpoint wrapper 放在 `src/v14/toolSpecs.ts` 与 `src/v14/endpoints.ts`，并补 `tests/v14-tools.test.ts`。
+12. Human in the loop 工具只负责生成审阅清单、草稿和写入预览；不要在审查工具中直接执行写入。
 
 ## API 约束
 
@@ -121,7 +123,7 @@ npm pack --dry-run
 
 完整 live 验证仍取决于测试店铺资料与 token scope。有些工具需要特定资料，比如限时特卖活动、联盟活动使用记录、商品订阅、已完成退货单、配送时段、客服对话、通路权限与商品评价。
 
-全部 68 个写入工具都避免默认 live 执行。只有在使用专用测试店铺且明确设置 `SHOPLINE_TEST_WRITES=1` 时才应执行 live 写入检查。
+全部写入工具都避免默认 live 执行。只有在使用专用测试店铺且明确设置 `SHOPLINE_TEST_WRITES=1` 时才应执行 live 写入检查。
 
 ## 开发计划
 
@@ -133,6 +135,7 @@ npm pack --dry-run
 - [x] 新增能力索引、工具搜索、工具解释、工作流推荐与写入 dry-run 预览
 - [x] 新增 Human in the loop 写入 approval_code 机制
 - [x] 新增商品内容、SEO/GEO 与补货候选辅助工具
-- [ ] 新增 webhook 即时订单通知
+- [x] 新增 v1.4 商家运营核心覆盖：Webhooks、扩展 Settings、Live Sales、User Coupons、Wish Lists、Staff、Return/Purchase 补全与选定 Metafields
+- [ ] 新增 webhook 事件接收服务
 
 当前 server 仍是 stdio transport，不直接接收 HTTP webhook。实时事件需要另建 HTTP/Webhook adapter，再把事件转成 MCP 可查询或可推送的上下文。

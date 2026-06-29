@@ -1,7 +1,6 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 
 import { withShoplineStore } from "../config.js";
-import { toolSpecs } from "../generated/toolSpecs.js";
 import { buildToolInputSchema } from "../schemas.js";
 import { toToolError, toToolResult } from "../shared/helpers.js";
 import type { ToolSpec } from "../types.js";
@@ -9,8 +8,9 @@ import { registerAssistantTools } from "./assistant.js";
 import { customHandlers } from "./custom.js";
 import { executeGenericTool } from "./generic.js";
 import { assertWriteApproved, buildWritePreview } from "./operationPlan.js";
+import { ALL_SHOPLINE_TOOL_SPECS, SHOPLINE_TOOL_SPECS, V14_TOOL_SPECS } from "./specs.js";
 
-export const SHOPLINE_TOOL_SPECS: readonly ToolSpec[] = toolSpecs as readonly ToolSpec[];
+export { ALL_SHOPLINE_TOOL_SPECS, SHOPLINE_TOOL_SPECS, V14_TOOL_SPECS };
 
 async function executeTool(spec: ToolSpec, args: Record<string, unknown>): Promise<Record<string, unknown>> {
   if (spec.write && args.dry_run === true) return buildWritePreview(spec, args);
@@ -23,7 +23,7 @@ async function executeTool(spec: ToolSpec, args: Record<string, unknown>): Promi
 export function registerShoplineTools(server: McpServer): void {
   registerAssistantTools(server);
 
-  for (const spec of SHOPLINE_TOOL_SPECS) {
+  for (const spec of ALL_SHOPLINE_TOOL_SPECS) {
     server.registerTool(
       spec.name,
       {

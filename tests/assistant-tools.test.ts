@@ -138,7 +138,7 @@ describe("assistant capability tools", () => {
   it("registers assistant tools without changing the 143 business tool baseline", async () => {
     const handlers = toolHandlers();
 
-    expect(handlers.size).toBe(153);
+    expect(handlers.size).toBe(279);
     expect(handlers.has("describe_shopline_mcp_capabilities")).toBe(true);
     expect(handlers.has("find_shopline_tools")).toBe(true);
     expect(handlers.has("explain_shopline_tool")).toBe(true);
@@ -154,7 +154,7 @@ describe("assistant capability tools", () => {
   it("summarizes the current business capability baseline", async () => {
     const result = await callTool("describe_shopline_mcp_capabilities");
 
-    expect(result.business_tools).toMatchObject({ total: 143, read: 75, write: 68 });
+    expect(result.business_tools).toMatchObject({ total: 269, read: 124, write: 145 });
     expect(result.assistant_tools).toMatchObject({ total: 10 });
     expect(result.safety).toMatchObject({
       write_marker: "[WRITE]",

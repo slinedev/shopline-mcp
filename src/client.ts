@@ -25,6 +25,27 @@ type FetchLike = typeof fetch;
 
 let fetchImplementation: FetchLike = (...args) => globalThis.fetch(...args);
 
+const ENDPOINTS_WITHOUT_DEFAULT_SORT = new Set([
+  "webhooks",
+  "staffs",
+  "user_coupons",
+  "wish_list_items",
+  "sale_products",
+  "sale_comments",
+  "sale_customers",
+  "coupon_center_promotions",
+  "merchant_app_metafields",
+  "merchant_metafields",
+  "product_app_metafields",
+  "product_metafields",
+  "order_app_metafields",
+  "order_metafields",
+  "customer_app_metafields",
+  "customer_metafields",
+  "order_item_app_metafields",
+  "order_item_metafields",
+]);
+
 export function setFetchImplementation(fetchLike: FetchLike): void {
   fetchImplementation = fetchLike;
 }
@@ -159,7 +180,9 @@ export async function fetchAllPages(
 ): Promise<Record<string, unknown>[]> {
   const requestParams: Record<string, unknown> = { ...params };
   requestParams.per_page ??= DEFAULT_PER_PAGE;
-  if (!endpointKey.includes("search")) requestParams.sort_by ??= DEFAULT_SORT;
+  if (!endpointKey.includes("search") && !ENDPOINTS_WITHOUT_DEFAULT_SORT.has(endpointKey)) {
+    requestParams.sort_by ??= DEFAULT_SORT;
+  }
 
   const allItems: Record<string, unknown>[] = [];
   let page = 1;
@@ -189,7 +212,7 @@ export async function fetchAllPagesByDateSegments(
   const allItems: Record<string, unknown>[] = [];
   const start = new Date(startDate.replace("Z", "+00:00"));
   const end = new Date(endDate.replace("Z", "+00:00"));
-  const segmentMs = 30 * 86_400_000;
+const segmentMs = 30 * 86_400_000;
 
   for (let current = start.getTime(); current < end.getTime(); current += segmentMs) {
     const segmentEnd = Math.min(current + segmentMs, end.getTime());

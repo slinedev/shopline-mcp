@@ -1,11 +1,12 @@
 import { endpoints } from "./generated/endpoints.js";
 import { AsyncLocalStorage } from "node:async_hooks";
+import { v14Endpoints } from "./v14/endpoints.js";
 
 export const BASE_URL = "https://open.shopline.io";
 export const DEFAULT_PER_PAGE = 50;
 export const DEFAULT_SORT = "desc";
 
-export const ENDPOINTS: Record<string, string> = { ...endpoints };
+export const ENDPOINTS: Record<string, string> = { ...endpoints, ...v14Endpoints };
 
 interface StoreConfig {
   readonly alias: string;

@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-Shopline API MCP Server implemented in TypeScript/Node.js. The package is published as `shopline-mcp` and exposes 143 tools (75 read + 68 write) over stdio for MCP-compatible clients.
+Shopline API MCP Server implemented in TypeScript/Node.js. The package is published as `shopline-mcp` and exposes 269 business tools (124 read + 145 write) plus 10 assistant tools (279 total) over stdio for MCP-compatible clients.
 
 Tool descriptions remain in Traditional Chinese (`zh-Hant`) because they are shown to AI clients and match the Shopline merchant context.
 
@@ -45,8 +45,11 @@ Local tests do not require `SHOPLINE_API_TOKEN`. Live read checks require `SHOPL
 - `src/tools/custom.ts` — hand-ported business logic for high-value analytical tools
 - `src/tools/generic.ts` — generic API executor for direct endpoint tools
 - `src/client.ts` — shared Shopline HTTP client with auth, retry, pagination, and DELETE body support
-- `src/generated/toolSpecs.ts` — static tool metadata baseline
-- `src/generated/endpoints.ts` — static Shopline endpoint map
+- `src/generated/toolSpecs.ts` — static tool metadata baseline (v1.3, 143 tools)
+- `src/generated/endpoints.ts` — static Shopline endpoint map (v1.3)
+- `src/v14/toolSpecs.ts` — v1.4 additive tool specs (126 tools)
+- `src/v14/endpoints.ts` — v1.4 additive endpoint map
+- `src/tools/specs.ts` — merges v1.3 + v1.4 into `ALL_SHOPLINE_TOOL_SPECS`
 - `tests/` — Node/Vitest tests and stdio smoke test
 
 ## Tool Conventions
