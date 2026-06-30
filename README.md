@@ -43,12 +43,6 @@ You need a valid Shopline Open API access token from a Shopline merchant account
 npm install shopline-mcp
 ```
 
-Or run directly:
-
-```bash
-npx shopline-mcp
-```
-
 Set your API token before starting the server:
 
 ```bash
@@ -61,15 +55,23 @@ For multiple stores, configure aliases:
 export SHOPLINE_STORES_JSON='{"tw":{"token":"tw_token"},"hk":{"token":"hk_token"}}'
 ```
 
-Then pass `store_alias` to any Shopline business tool.
+### Diagnostics
 
-### Use with Claude Code
+If you encounter issues, run the diagnostic command. It checks your local MCP server, token configuration, and a read-only Shopline API connection. It does not modify any client configuration files.
+
+```bash
+npx shopline-mcp doctor
+```
+
+### Manual Client Setup
+
+#### Claude Code
 
 ```bash
 claude mcp add --transport stdio shopline -e SHOPLINE_API_TOKEN=your_token_here -- npx shopline-mcp
 ```
 
-### Use with Claude Desktop
+#### Claude Desktop
 
 ```json
 {
@@ -84,6 +86,70 @@ claude mcp add --transport stdio shopline -e SHOPLINE_API_TOKEN=your_token_here 
   }
 }
 ```
+
+#### Codex
+
+Add this to `~/.codex/config.toml`:
+
+```toml
+[mcp_servers.shopline]
+command = "npx"
+args = ["-y", "shopline-mcp"]
+env_vars = ["SHOPLINE_API_TOKEN"]
+```
+
+See the [Codex MCP configuration docs](https://developers.openai.com/codex/config-basic) for more details.
+
+#### OpenCode
+
+Add this to `opencode.json`:
+
+```json
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "shopline": {
+      "type": "local",
+      "command": ["npx", "-y", "shopline-mcp"],
+      "enabled": true,
+      "environment": {
+        "SHOPLINE_API_TOKEN": "{env:SHOPLINE_API_TOKEN}"
+      }
+    }
+  }
+}
+```
+
+See the [OpenCode MCP servers docs](https://opencode.ai/docs/mcp-servers/) for more details.
+
+#### VS Code
+
+Add this to `.vscode/mcp.json` or your user MCP configuration:
+
+```json
+{
+  "inputs": [
+    {
+      "type": "promptString",
+      "id": "shopline-api-token",
+      "description": "Shopline API Token",
+      "password": true
+    }
+  ],
+  "servers": {
+    "shopline": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "shopline-mcp"],
+      "env": {
+        "SHOPLINE_API_TOKEN": "${input:shopline-api-token}"
+      }
+    }
+  }
+}
+```
+
+See the [VS Code MCP configuration docs](https://code.visualstudio.com/docs/copilot/reference/mcp-configuration) for more details.
 
 ## Important: Write Tools
 

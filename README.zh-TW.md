@@ -43,33 +43,35 @@ Shopline Open API 的 MCP server，npm 套件名稱為 `shopline-mcp`。
 npm install shopline-mcp
 ```
 
-或直接執行：
-
-```bash
-npx shopline-mcp
-```
-
-啟動前先設定 API token：
+在啟動伺服器之前，請設定您的 API token：
 
 ```bash
 export SHOPLINE_API_TOKEN=your_token_here
 ```
 
-若要配置多個商店，可設定 alias：
+若要支援多間商店，請設定 alias：
 
 ```bash
 export SHOPLINE_STORES_JSON='{"tw":{"token":"tw_token"},"hk":{"token":"hk_token"}}'
 ```
 
-之後在任一 Shopline 業務工具中傳入 `store_alias` 即可指定店鋪。
+### 診斷工具
 
-### 搭配 Claude Code 使用
+如果遇到連線問題，您可以執行診斷命令。它會檢查本機 MCP server、token 設定，以及只讀的 Shopline API 連線，不會修改任何 client 設定檔。
+
+```bash
+npx shopline-mcp doctor
+```
+
+### 手動設定 Client
+
+#### Claude Code
 
 ```bash
 claude mcp add --transport stdio shopline -e SHOPLINE_API_TOKEN=your_token_here -- npx shopline-mcp
 ```
 
-### 搭配 Claude Desktop 使用
+#### Claude Desktop
 
 ```json
 {
@@ -84,6 +86,70 @@ claude mcp add --transport stdio shopline -e SHOPLINE_API_TOKEN=your_token_here 
   }
 }
 ```
+
+#### Codex
+
+將以下內容加入 `~/.codex/config.toml`：
+
+```toml
+[mcp_servers.shopline]
+command = "npx"
+args = ["-y", "shopline-mcp"]
+env_vars = ["SHOPLINE_API_TOKEN"]
+```
+
+更多資訊請參考 [Codex MCP 設定文件](https://developers.openai.com/codex/config-basic)。
+
+#### OpenCode
+
+將以下內容加入 `opencode.json`：
+
+```json
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "shopline": {
+      "type": "local",
+      "command": ["npx", "-y", "shopline-mcp"],
+      "enabled": true,
+      "environment": {
+        "SHOPLINE_API_TOKEN": "{env:SHOPLINE_API_TOKEN}"
+      }
+    }
+  }
+}
+```
+
+更多資訊請參考 [OpenCode MCP servers 文件](https://opencode.ai/docs/mcp-servers/)。
+
+#### VS Code
+
+將以下內容加入 `.vscode/mcp.json` 或 User MCP 設定：
+
+```json
+{
+  "inputs": [
+    {
+      "type": "promptString",
+      "id": "shopline-api-token",
+      "description": "Shopline API Token",
+      "password": true
+    }
+  ],
+  "servers": {
+    "shopline": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "shopline-mcp"],
+      "env": {
+        "SHOPLINE_API_TOKEN": "${input:shopline-api-token}"
+      }
+    }
+  }
+}
+```
+
+更多資訊請參考 [VS Code MCP 設定文件](https://code.visualstudio.com/docs/copilot/reference/mcp-configuration)。
 
 ## 重要：寫入工具
 

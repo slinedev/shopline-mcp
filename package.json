@@ -24,9 +24,9 @@
   ],
   "scripts": {
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "build": "tsc -p tsconfig.json && chmod +x dist/index.js",
+    "build": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\" && tsc -p tsconfig.json && chmod +x dist/index.js",
     "test": "vitest run",
-    "test:smoke": "node tests/smoke-tools-list.mjs",
+    "test:smoke": "node tests/smoke-tools-list.mjs && node tests/smoke-cli-commands.mjs",
     "verify": "npm run typecheck && npm run build && npm test && npm run test:smoke",
     "prepack": "npm run build"
   },

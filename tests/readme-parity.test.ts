@@ -46,6 +46,14 @@ describe("README Python parity", () => {
     expect(english).toContain("Human in the loop");
     expect(english).toContain("third-party open-source package");
     expect(english).toContain("SHOPLINE_STORES_JSON");
+    expect(english).toContain("npx shopline-mcp doctor");
+    expect(english).toContain("~/.codex/config.toml");
+    expect(english).toContain("[mcp_servers.shopline]");
+    expect(english).toContain("opencode.json");
+    expect(english).toContain('"mcp"');
+    expect(english).toContain(".vscode/mcp.json");
+    expect(english).toContain('"servers"');
+    expect(english).toContain("${input:shopline-api-token}");
     expect(english).toContain(
       "rebuilt with reference to the MIT-licensed Python project [asgard-ai-platform/mcp-shopline](https://github.com/asgard-ai-platform/mcp-shopline)",
     );
@@ -59,6 +67,8 @@ describe("README Python parity", () => {
     expect(english).not.toContain("npm pack --dry-run");
     expect(english).not.toContain("pip install mcp-shopline");
     expect(english).not.toContain("uvx --from mcp-shopline");
+    expect(english).not.toContain("npx shopline-mcp init");
+    expect(english).not.toContain("initialization wizard");
   });
 
   it("keeps the Traditional Chinese README focused on user-facing setup and usage", () => {
@@ -75,6 +85,14 @@ describe("README Python parity", () => {
     expect(traditionalChinese).toContain("Human in the loop");
     expect(traditionalChinese).toContain("第三方開源套件");
     expect(traditionalChinese).toContain("SHOPLINE_STORES_JSON");
+    expect(traditionalChinese).toContain("npx shopline-mcp doctor");
+    expect(traditionalChinese).toContain("~/.codex/config.toml");
+    expect(traditionalChinese).toContain("[mcp_servers.shopline]");
+    expect(traditionalChinese).toContain("opencode.json");
+    expect(traditionalChinese).toContain('"mcp"');
+    expect(traditionalChinese).toContain(".vscode/mcp.json");
+    expect(traditionalChinese).toContain('"servers"');
+    expect(traditionalChinese).toContain("${input:shopline-api-token}");
     expect(traditionalChinese).toContain("參考自採用 MIT 授權的 Python 專案 [asgard-ai-platform/mcp-shopline](https://github.com/asgard-ai-platform/mcp-shopline)");
     expect(traditionalChinese).toContain("參考 Python 專案（MIT）：[asgard-ai-platform/mcp-shopline](https://github.com/asgard-ai-platform/mcp-shopline)");
     expect(traditionalChinese).toContain("263 個 method/path endpoint");
@@ -86,6 +104,8 @@ describe("README Python parity", () => {
     expect(traditionalChinese).not.toContain("npm pack --dry-run");
     expect(traditionalChinese).not.toContain("pip install mcp-shopline");
     expect(traditionalChinese).not.toContain("uvx --from mcp-shopline");
+    expect(traditionalChinese).not.toContain("npx shopline-mcp init");
+    expect(traditionalChinese).not.toContain("初始化嚮導");
   });
 
   it("moves development content into the Simplified Chinese DEV.md", () => {
